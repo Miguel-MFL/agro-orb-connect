@@ -24,6 +24,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
     contact: "",
     image: ""
   });
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +54,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
       contact: "",
       image: ""
     });
+    setImagePreview("");
     setOpen(false);
   };
 
@@ -144,14 +146,36 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image">URL da Imagem (opcional)</Label>
-            <Input
-              id="image"
-              type="url"
-              value={formData.image}
-              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-              placeholder="https://..."
-            />
+            <Label htmlFor="image">Foto da Máquina</Label>
+            <div className="space-y-3">
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      const result = reader.result as string;
+                      setFormData({ ...formData, image: result });
+                      setImagePreview(result);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="cursor-pointer"
+              />
+              {imagePreview && (
+                <div className="relative w-full h-40 rounded-md overflow-hidden border border-border">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <Button type="submit" className="w-full" variant="default">
