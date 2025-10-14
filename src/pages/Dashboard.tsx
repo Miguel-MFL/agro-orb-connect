@@ -90,7 +90,7 @@ const Dashboard = () => {
             <div className="relative w-80 h-80">
               {/* Left Half - Route Optimization */}
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/routes-optimization")}
                 className="absolute left-0 top-0 w-40 h-80 bg-gradient-hero rounded-l-full flex items-center justify-center group hover:scale-105 transition-transform duration-300 shadow-strong border-r-2 border-primary-foreground"
               >
                 <div className="text-center px-4">
