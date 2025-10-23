@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Machines from "./pages/Machines";
 import RouteOptimization from "./pages/RouteOptimization";
+import FoodQuote from "./pages/FoodQuote";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,7 +22,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/machines" element={<Machines />} />
-          <Route path="/routes-optimization" element={<RouteOptimization />} /> {/* Nova rota */}          
+          <Route path="/routes-optimization" element={<RouteOptimization />} />
+          <Route path="/food-quote" element={<FoodQuote />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
