@@ -133,9 +133,9 @@ const Dashboard = () => {
                 <Button 
                   variant="accent" 
                   size="lg"
-                  onClick={() => navigate("/machines")}
+                  onClick={() => window.open("https://lovable.dev/projects/62119afa-9e23-4362-8b6f-7bced281b694", "_blank")}
                 >
-                  Explorar Máquinas
+                  Cotação de Alimentos
                 </Button>
               </CardContent>
             </Card>
