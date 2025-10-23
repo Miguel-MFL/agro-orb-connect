@@ -133,9 +133,9 @@ const Dashboard = () => {
                 <Button 
                   variant="accent" 
                   size="lg"
-                  onClick={() => navigate("/food-quote")}
+                  onClick={() => navigate("/shop")}
                 >
-                  Cotação de Alimentos
+                  Loja de Produtos
                 </Button>
               </CardContent>
             </Card>

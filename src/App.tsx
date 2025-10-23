@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Machines from "./pages/Machines";
 import RouteOptimization from "./pages/RouteOptimization";
 import FoodQuote from "./pages/FoodQuote";
+import Shop from "./pages/Shop";
+import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/machines" element={<Machines />} />
           <Route path="/routes-optimization" element={<RouteOptimization />} />
           <Route path="/food-quote" element={<FoodQuote />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:handle" element={<ProductDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
