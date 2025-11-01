@@ -11,6 +11,7 @@ import FoodQuote from "./pages/FoodQuote";
 import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,12 +23,12 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/machines" element={<Machines />} />
-          <Route path="/routes-optimization" element={<RouteOptimization />} />
-          <Route path="/food-quote" element={<FoodQuote />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:handle" element={<ProductDetail />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/machines" element={<ProtectedRoute><Machines /></ProtectedRoute>} />
+          <Route path="/routes-optimization" element={<ProtectedRoute><RouteOptimization /></ProtectedRoute>} />
+          <Route path="/food-quote" element={<ProtectedRoute><FoodQuote /></ProtectedRoute>} />
+          <Route path="/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+          <Route path="/product/:handle" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

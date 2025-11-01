@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tractor, Search, ArrowLeft } from "lucide-react";
 import MachineCard, { Machine } from "@/components/MachineCard";
 import AddMachineDialog from "@/components/AddMachineDialog";
-import tratImage from "@/assets/trator.jpg";
-import plantImage from "@/assets/plantadeira.jpg";
-import pulvImage from "@/assets/pulverizador.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const MACHINE_TYPES = [
   "Trator Agrícola Compacto",
@@ -28,51 +27,92 @@ const MACHINE_TYPES = [
   "Perfurador de Solo (Implemento)"
 ];
 
-const initialMachines: Machine[] = [
-  {
-    id: "1",
-    name: "Trator Massey Ferguson 4283",
-    type: "Trator Agrícola Compacto",
-    year: 2020,
-    usageTime: "1.200 horas",
-    location: "Ribeirão Preto, SP",
-    contact: "(16) 99876-5432",
-    image: tratImage
-  },
-  {
-    id: "2",
-    name: "Plantadeira Jumil 2980 PD",
-    type: "Plantadeira Autotransportável",
-    year: 2019,
-    usageTime: "800 horas",
-    location: "Londrina, PR",
-    contact: "(43) 98765-4321",
-    image: plantImage
-  },
-  {
-    id: "3",
-    name: "Pulverizador Montana Parruda",
-    type: "Pulverizador de Arrasto",
-    year: 2021,
-    usageTime: "500 horas",
-    location: "Sorriso, MT",
-    contact: "(66) 99123-4567",
-    image: pulvImage
-  }
-];
-
 const Machines = () => {
   const navigate = useNavigate();
-  const [machines, setMachines] = useState<Machine[]>(initialMachines);
+  const [machines, setMachines] = useState<Machine[]>([]);
   const [searchType, setSearchType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleAddMachine = (newMachine: Omit<Machine, "id">) => {
-    const machine: Machine = {
-      ...newMachine,
-      id: Date.now().toString()
-    };
-    setMachines([...machines, machine]);
+  useEffect(() => {
+    fetchMachines();
+  }, []);
+
+  const fetchMachines = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("machines")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const machines: Machine[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        year: item.year,
+        usageTime: item.usage_time,
+        location: item.location,
+        contact: item.contact,
+        image: item.image || "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800"
+      }));
+
+      setMachines(machines);
+    } catch (error: any) {
+      toast.error("Erro ao carregar máquinas");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddMachine = async (newMachine: Omit<Machine, "id">) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Você precisa estar logado para cadastrar uma máquina");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("machines")
+        .insert([
+          {
+            name: newMachine.name,
+            type: newMachine.type,
+            year: newMachine.year,
+            usage_time: newMachine.usageTime,
+            location: newMachine.location,
+            contact: newMachine.contact,
+            image: newMachine.image,
+            user_id: user.id
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const machine: Machine = {
+          id: data.id,
+          name: data.name,
+          type: data.type,
+          year: data.year,
+          usageTime: data.usage_time,
+          location: data.location,
+          contact: data.contact,
+          image: data.image
+        };
+        setMachines([machine, ...machines]);
+        toast.success("Máquina cadastrada com sucesso!");
+      }
+    } catch (error: any) {
+      toast.error("Erro ao cadastrar máquina");
+      console.error(error);
+    }
   };
 
   const filteredMachines = machines.filter((machine) => {
@@ -136,7 +176,12 @@ const Machines = () => {
         </div>
 
         {/* Results */}
-        {filteredMachines.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Carregando máquinas...</p>
+          </div>
+        ) : filteredMachines.length === 0 ? (
           <div className="text-center py-16">
             <div className="bg-muted/30 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
               <Tractor className="w-16 h-16 text-muted-foreground" />
