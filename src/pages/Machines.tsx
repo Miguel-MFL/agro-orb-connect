@@ -33,10 +33,17 @@ const Machines = () => {
   const [searchType, setSearchType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMachines();
+    getCurrentUser();
   }, []);
+
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUserId(user?.id || null);
+  };
 
   const fetchMachines = async () => {
     try {
@@ -55,7 +62,8 @@ const Machines = () => {
         usageTime: item.usage_time,
         location: item.location,
         contact: item.contact,
-        image: item.image || "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800"
+        image: item.image || "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800",
+        userId: item.user_id
       }));
 
       setMachines(machines);
@@ -104,13 +112,31 @@ const Machines = () => {
           usageTime: data.usage_time,
           location: data.location,
           contact: data.contact,
-          image: data.image
+          image: data.image,
+          userId: data.user_id
         };
         setMachines([machine, ...machines]);
         toast.success("Máquina cadastrada com sucesso!");
       }
     } catch (error: any) {
       toast.error("Erro ao cadastrar máquina");
+      console.error(error);
+    }
+  };
+
+  const handleDeleteMachine = async (machineId: string) => {
+    try {
+      const { error } = await supabase
+        .from("machines")
+        .delete()
+        .eq("id", machineId);
+
+      if (error) throw error;
+
+      setMachines(machines.filter(m => m.id !== machineId));
+      toast.success("Máquina excluída com sucesso!");
+    } catch (error: any) {
+      toast.error("Erro ao excluir máquina");
       console.error(error);
     }
   };
@@ -203,7 +229,12 @@ const Machines = () => {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredMachines.map((machine) => (
-                <MachineCard key={machine.id} machine={machine} />
+                <MachineCard 
+                  key={machine.id} 
+                  machine={machine}
+                  currentUserId={currentUserId || undefined}
+                  onDelete={handleDeleteMachine}
+                />
               ))}
             </div>
           </>
