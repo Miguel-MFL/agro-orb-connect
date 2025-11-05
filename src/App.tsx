@@ -3,11 +3,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Machines from "./pages/Machines";
 import RouteOptimization from "./pages/RouteOptimization";
 import FoodQuote from "./pages/FoodQuote";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -18,10 +20,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/machines" element={<Machines />} />
-          <Route path="/routes-optimization" element={<RouteOptimization />} />
-          <Route path="/food-quote" element={<FoodQuote />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/machines" element={<ProtectedRoute><Machines /></ProtectedRoute>} />
+          <Route path="/routes-optimization" element={<ProtectedRoute><RouteOptimization /></ProtectedRoute>} />
+          <Route path="/food-quote" element={<ProtectedRoute><FoodQuote /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
