@@ -2,22 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tractor, Route, CheckCircle, TrendingUp, Zap, Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import heroImage from "@/assets/hero-farm.jpg";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Erro ao fazer logout");
-    } else {
-      toast.success("Logout realizado com sucesso!");
-      navigate("/login");
-    }
-  };
 
   const benefits = [
     {
@@ -51,9 +39,6 @@ const Dashboard = () => {
             <Tractor className="w-8 h-8" />
             <h1 className="text-2xl font-bold">Orna</h1>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-            Sair
-          </Button>
         </div>
       </header>
 
@@ -142,13 +127,6 @@ const Dashboard = () => {
                 <p className="mb-6 text-primary-foreground/90">
                   Junte-se a centenas de produtores que já otimizam suas operações
                 </p>
-                <Button 
-                  variant="accent" 
-                  size="lg"
-                  onClick={() => navigate("/shop")}
-                >
-                  Loja de Produtos
-                </Button>
               </CardContent>
             </Card>
           </div>

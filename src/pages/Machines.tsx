@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tractor, Search, ArrowLeft } from "lucide-react";
 import MachineCard, { Machine } from "@/components/MachineCard";
 import AddMachineDialog from "@/components/AddMachineDialog";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 const MACHINE_TYPES = [
   "Trator Agrícola Compacto",
@@ -32,113 +30,18 @@ const Machines = () => {
   const [machines, setMachines] = useState<Machine[]>([]);
   const [searchType, setSearchType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchMachines();
-    getCurrentUser();
-  }, []);
-
-  const getCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setCurrentUserId(user?.id || null);
+  const handleAddMachine = (newMachine: Omit<Machine, "id">) => {
+    const machine: Machine = {
+      ...newMachine,
+      id: Date.now().toString(),
+      userId: "mock-user-id"
+    };
+    setMachines([machine, ...machines]);
   };
 
-  const fetchMachines = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("machines")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      const machines: Machine[] = (data || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        type: item.type,
-        year: item.year,
-        usageTime: item.usage_time,
-        location: item.location,
-        contact: item.contact,
-        image: item.image || "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800",
-        userId: item.user_id
-      }));
-
-      setMachines(machines);
-    } catch (error: any) {
-      toast.error("Erro ao carregar máquinas");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddMachine = async (newMachine: Omit<Machine, "id">) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error("Você precisa estar logado para cadastrar uma máquina");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("machines")
-        .insert([
-          {
-            name: newMachine.name,
-            type: newMachine.type,
-            year: newMachine.year,
-            usage_time: newMachine.usageTime,
-            location: newMachine.location,
-            contact: newMachine.contact,
-            image: newMachine.image,
-            user_id: user.id
-          }
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        const machine: Machine = {
-          id: data.id,
-          name: data.name,
-          type: data.type,
-          year: data.year,
-          usageTime: data.usage_time,
-          location: data.location,
-          contact: data.contact,
-          image: data.image,
-          userId: data.user_id
-        };
-        setMachines([machine, ...machines]);
-        toast.success("Máquina cadastrada com sucesso!");
-      }
-    } catch (error: any) {
-      toast.error("Erro ao cadastrar máquina");
-      console.error(error);
-    }
-  };
-
-  const handleDeleteMachine = async (machineId: string) => {
-    try {
-      const { error } = await supabase
-        .from("machines")
-        .delete()
-        .eq("id", machineId);
-
-      if (error) throw error;
-
-      setMachines(machines.filter(m => m.id !== machineId));
-      toast.success("Máquina excluída com sucesso!");
-    } catch (error: any) {
-      toast.error("Erro ao excluir máquina");
-      console.error(error);
-    }
+  const handleDeleteMachine = (machineId: string) => {
+    setMachines(machines.filter(m => m.id !== machineId));
   };
 
   const filteredMachines = machines.filter((machine) => {
@@ -158,9 +61,9 @@ const Machines = () => {
             <h1 className="text-2xl font-bold">Orna - Aluguel de Máquinas</h1>
           </div>
           <Button 
-            variant="outline" 
+            variant="ghost" 
             onClick={() => navigate("/")}
-            className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            className="text-green-600 hover:text-red-600 hover:bg-transparent"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
@@ -202,12 +105,7 @@ const Machines = () => {
         </div>
 
         {/* Results */}
-        {loading ? (
-          <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Carregando máquinas...</p>
-          </div>
-        ) : filteredMachines.length === 0 ? (
+        {filteredMachines.length === 0 ? (
           <div className="text-center py-16">
             <div className="bg-muted/30 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
               <Tractor className="w-16 h-16 text-muted-foreground" />
@@ -216,7 +114,7 @@ const Machines = () => {
               Não há máquinas disponíveis no momento
             </h3>
             <p className="text-muted-foreground mb-6">
-              Tente ajustar os filtros ou cadastre uma nova máquina
+              Cadastre uma nova máquina para começar
             </p>
             <AddMachineDialog onAddMachine={handleAddMachine} machineTypes={MACHINE_TYPES} />
           </div>
@@ -232,7 +130,7 @@ const Machines = () => {
                 <MachineCard 
                   key={machine.id} 
                   machine={machine}
-                  currentUserId={currentUserId || undefined}
+                  currentUserId="mock-user-id"
                   onDelete={handleDeleteMachine}
                 />
               ))}
