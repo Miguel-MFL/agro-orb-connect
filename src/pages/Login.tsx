@@ -76,13 +76,20 @@ const Login = () => {
         setPassword("");
         setFullName("");
       } else {
-        // Login
-        const user = users.find((u: any) => u.email === email && u.password === password);
+        // Login - permite acesso direto
+        let user = users.find((u: any) => u.email === email && u.password === password);
         
+        // Se não encontrou usuário, cria automaticamente
         if (!user) {
-          toast.error("Email ou senha incorretos");
-          setLoading(false);
-          return;
+          user = {
+            id: Date.now().toString(),
+            email: validation.data.email,
+            password: validation.data.password,
+            fullName: "Usuário",
+            createdAt: new Date().toISOString()
+          };
+          users.push(user);
+          localStorage.setItem("users", JSON.stringify(users));
         }
 
         localStorage.setItem("currentUser", JSON.stringify(user));
