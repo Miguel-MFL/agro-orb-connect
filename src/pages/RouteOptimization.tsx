@@ -187,184 +187,192 @@ const RouteOptimization = () => {
         </div>
       </header>
 
-      {/* Main Content - 3 Columns */}
+      {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="space-y-6">
           
-          {/* Left Column - Terrain Configuration */}
-          <div className="lg:col-span-3">
-            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
-              <CardHeader>
-                <CardTitle className={`text-xl ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
-                  Configuração do Terreno
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Dimensões Fixas</Label>
-                  <div className={`p-4 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
-                    <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
-                      {FIXED_ROWS} linhas × {FIXED_COLS} colunas
-                    </p>
-                    <p className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
-                      Dimensões otimizadas para visualização
-                    </p>
+          {/* Top Row - Configuration and Drawing Mode */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* Left - Terrain Configuration */}
+            <div className="lg:col-span-3">
+              <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+                <CardHeader>
+                  <CardTitle className={`text-xl ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
+                    Configuração do Terreno
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Dimensões Fixas</Label>
+                    <div className={`p-4 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
+                      <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
+                        {FIXED_ROWS} linhas × {FIXED_COLS} colunas
+                      </p>
+                      <p className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
+                        Dimensões otimizadas para visualização
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className={`space-y-3 pt-4 border-t ${isDarkTheme ? "border-gray-800" : "border-gray-200"}`}>
-                  <h3 className={`font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>Imagem de Fundo</h3>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="background"
-                      checked={useBackground}
-                      onCheckedChange={(checked) => setUseBackground(checked as boolean)}
+                  <div className={`space-y-3 pt-4 border-t ${isDarkTheme ? "border-gray-800" : "border-gray-200"}`}>
+                    <h3 className={`font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>Imagem de Fundo</h3>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="background"
+                        checked={useBackground}
+                        onCheckedChange={(checked) => setUseBackground(checked as boolean)}
+                      />
+                      <label htmlFor="background" className={`text-sm ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>
+                        Usar Imagem de Fundo
+                      </label>
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      className={`w-full ${isDarkTheme ? "bg-gray-800 border-gray-700 text-white hover:bg-gray-700" : "bg-white border-gray-300 hover:bg-gray-50"}`}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Carregar Imagem
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileUpload}
                     />
-                    <label htmlFor="background" className={`text-sm ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>
-                      Usar Imagem de Fundo
-                    </label>
+                    
+                    <div className="space-y-1">
+                      <Label className={`text-xs ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>Ou cole uma URL:</Label>
+                      <Input
+                        placeholder="https://exemplo.com/terreno.jpg"
+                        value={backgroundUrl}
+                        onChange={(e) => setBackgroundUrl(e.target.value)}
+                        className={`text-sm ${isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
+                      />
+                    </div>
                   </div>
-                  
+
                   <Button
-                    variant="outline"
-                    className={`w-full ${isDarkTheme ? "bg-gray-800 border-gray-700 text-white hover:bg-gray-700" : "bg-white border-gray-300 hover:bg-gray-50"}`}
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={initializeGrid}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
-                    Carregar Imagem
+                    Inicializar Grid
                   </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                  />
-                  
-                  <div className="space-y-1">
-                    <Label className={`text-xs ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>Ou cole uma URL:</Label>
-                    <Input
-                      placeholder="https://exemplo.com/terreno.jpg"
-                      value={backgroundUrl}
-                      onChange={(e) => setBackgroundUrl(e.target.value)}
-                      className={`text-sm ${isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
-                    />
-                  </div>
-                </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                <Button
-                  onClick={initializeGrid}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Inicializar Grid
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Right - Drawing Mode */}
+            <div className="lg:col-span-9">
+              <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+                <CardHeader>
+                  <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Modo de Desenho</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    {[
+                      { value: "empty", label: "Vazio", icon: Circle },
+                      { value: "obstacle", label: "Obstáculo", icon: Square },
+                      { value: "start", label: "Início", icon: MapPin },
+                      { value: "end", label: "Fim", icon: Flag },
+                      { value: "machine", label: "Máquina", icon: Tractor },
+                    ].map((mode) => {
+                      const Icon = mode.icon;
+                      return (
+                        <button
+                          key={mode.value}
+                          onClick={() => setDrawMode(mode.value as DrawMode)}
+                          className={`flex items-center justify-center gap-2 p-4 rounded-lg border transition-colors ${
+                            drawMode === mode.value
+                              ? "bg-blue-600 border-blue-500 text-white"
+                              : isDarkTheme
+                              ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-750"
+                              : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span className="font-medium">{mode.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
           </div>
 
-          {/* Center Column - Grid Visualization */}
-          <div className="lg:col-span-6">
-            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Visualização do Terreno</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white hover:bg-gray-700" : "bg-white border-gray-300 hover:bg-gray-50"}
-                      onClick={() => setZoom(Math.max(50, zoom - 10))}
-                    >
-                      <ZoomOut className="w-4 h-4" />
-                    </Button>
-                    <span className={`text-sm w-16 text-center ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>{zoom}%</span>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white hover:bg-gray-700" : "bg-white border-gray-300 hover:bg-gray-50"}
-                      onClick={() => setZoom(Math.min(200, zoom + 10))}
-                    >
-                      <ZoomIn className="w-4 h-4" />
-                    </Button>
+          {/* Middle Row - Grid Visualization */}
+          <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Visualização do Terreno</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white hover:bg-gray-700" : "bg-white border-gray-300 hover:bg-gray-50"}
+                    onClick={() => setZoom(Math.max(50, zoom - 10))}
+                  >
+                    <ZoomOut className="w-4 h-4" />
+                  </Button>
+                  <span className={`text-sm w-16 text-center ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>{zoom}%</span>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white hover:bg-gray-700" : "bg-white border-gray-300 hover:bg-gray-50"}
+                    onClick={() => setZoom(Math.min(200, zoom + 10))}
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`${isDarkTheme ? "bg-gray-950" : "bg-gray-100"} rounded-lg p-4 overflow-auto max-h-[600px]`}>
+                {grid.length === 0 ? (
+                  <div className={`h-96 flex items-center justify-center ${isDarkTheme ? "text-gray-500" : "text-gray-400"}`}>
+                    <p>Inicialize o grid para começar</p>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className={`${isDarkTheme ? "bg-gray-950" : "bg-gray-100"} rounded-lg p-4 overflow-auto max-h-[600px]`}>
-                  {grid.length === 0 ? (
-                    <div className={`h-96 flex items-center justify-center ${isDarkTheme ? "text-gray-500" : "text-gray-400"}`}>
-                      <p>Inicialize o grid para começar</p>
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(${FIXED_COLS}, 1fr)`,
-                        gap: "2px",
-                        transform: `scale(${zoom / 100})`,
-                        transformOrigin: "top left",
-                        backgroundImage: useBackground && backgroundUrl ? `url(${backgroundUrl})` : "none",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                      onMouseDown={() => setIsDrawing(true)}
-                      onMouseUp={() => setIsDrawing(false)}
-                      onMouseLeave={() => setIsDrawing(false)}
-                    >
-                      {grid.map((row, rowIdx) =>
-                        row.map((cell, colIdx) => (
-                          <div
-                            key={`${rowIdx}-${colIdx}`}
-                            className={`w-6 h-6 border ${isDarkTheme ? "border-gray-800" : "border-gray-300"} rounded-sm cursor-pointer flex items-center justify-center ${getCellColor(cell.type)} hover:opacity-80 transition-opacity`}
-                            onClick={() => handleCellClick(rowIdx, colIdx)}
-                            onMouseEnter={() => handleCellMouseEnter(rowIdx, colIdx)}
-                          >
-                            {cell.type !== "empty" && getCellIcon(cell.type)}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                ) : (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${FIXED_COLS}, 1fr)`,
+                      gap: "2px",
+                      transform: `scale(${zoom / 100})`,
+                      transformOrigin: "top left",
+                      backgroundImage: useBackground && backgroundUrl ? `url(${backgroundUrl})` : "none",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                    onMouseDown={() => setIsDrawing(true)}
+                    onMouseUp={() => setIsDrawing(false)}
+                    onMouseLeave={() => setIsDrawing(false)}
+                  >
+                    {grid.map((row, rowIdx) =>
+                      row.map((cell, colIdx) => (
+                        <div
+                          key={`${rowIdx}-${colIdx}`}
+                          className={`w-6 h-6 border ${isDarkTheme ? "border-gray-800" : "border-gray-300"} rounded-sm cursor-pointer flex items-center justify-center ${getCellColor(cell.type)} hover:opacity-80 transition-opacity`}
+                          onClick={() => handleCellClick(rowIdx, colIdx)}
+                          onMouseEnter={() => handleCellMouseEnter(rowIdx, colIdx)}
+                        >
+                          {cell.type !== "empty" && getCellIcon(cell.type)}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Right Column - Simulation Controls */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Drawing Mode Card */}
-            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
-              <CardHeader>
-                <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Modo de Desenho</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  { value: "empty", label: "Vazio", icon: Circle },
-                  { value: "obstacle", label: "Obstáculo", icon: Square },
-                  { value: "start", label: "Início", icon: MapPin },
-                  { value: "end", label: "Fim", icon: Flag },
-                  { value: "machine", label: "Máquina", icon: Tractor },
-                ].map((mode) => {
-                  const Icon = mode.icon;
-                  return (
-                    <button
-                      key={mode.value}
-                      onClick={() => setDrawMode(mode.value as DrawMode)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                        drawMode === mode.value
-                          ? "bg-blue-600 border-blue-500 text-white"
-                          : isDarkTheme
-                          ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-750"
-                          : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span>{mode.label}</span>
-                    </button>
-                  );
-                })}
-              </CardContent>
-            </Card>
-
+          {/* Bottom Row - Parameters, Estimates, and Actions in Rectangular Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
             {/* Parameters Card */}
             <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
               <CardHeader>
@@ -541,7 +549,10 @@ const RouteOptimization = () => {
 
             {/* Action Buttons Card */}
             <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
-              <CardContent className="pt-6 space-y-3">
+              <CardHeader>
+                <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Ações</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <Button
                   onClick={handleStartRoute}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -557,6 +568,7 @@ const RouteOptimization = () => {
                 </Button>
               </CardContent>
             </Card>
+
           </div>
 
         </div>
