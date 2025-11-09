@@ -330,13 +330,13 @@ const RouteOptimization = () => {
           </div>
 
           {/* Right Column - Drawing Mode */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 flex flex-col">
             {/* Drawing Mode Card */}
-            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+            <Card className={`${isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} flex flex-col h-full`}>
               <CardHeader>
                 <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Modo de Desenho</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 flex-1 flex flex-col justify-center">
                 {[
                   { value: "empty", label: "Vazio", icon: Circle },
                   { value: "obstacle", label: "Obstáculo", icon: Square },
