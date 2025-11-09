@@ -187,14 +187,12 @@ const RouteOptimization = () => {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content - 3 Columns */}
       <div className="container mx-auto px-6 py-8">
-        {/* Top Section - Configuration and Visualization */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Left Column - Terrain Configuration & Drawing Mode */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Terrain Configuration */}
+          {/* Left Column - Terrain Configuration */}
+          <div className="lg:col-span-3">
             <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
               <CardHeader>
                 <CardTitle className={`text-xl ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
@@ -261,61 +259,10 @@ const RouteOptimization = () => {
                 </Button>
               </CardContent>
             </Card>
-
-            {/* Drawing Mode Card */}
-            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
-              <CardHeader>
-                <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Modo de Desenho</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  { value: "empty", label: "Vazio", icon: Circle },
-                  { value: "obstacle", label: "Obstáculo", icon: Square },
-                  { value: "start", label: "Início", icon: MapPin },
-                  { value: "end", label: "Fim", icon: Flag },
-                  { value: "machine", label: "Máquina", icon: Tractor },
-                ].map((mode) => {
-                  const Icon = mode.icon;
-                  return (
-                    <button
-                      key={mode.value}
-                      onClick={() => setDrawMode(mode.value as DrawMode)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                        drawMode === mode.value
-                          ? "bg-blue-600 border-blue-500 text-white"
-                          : isDarkTheme
-                          ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-750"
-                          : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span>{mode.label}</span>
-                    </button>
-                  );
-                })}
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              <Button
-                onClick={handleStartRoute}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Iniciar Rota
-              </Button>
-              <Button
-                onClick={handleClearGrid}
-                variant="destructive"
-                className="w-full bg-red-600 hover:bg-red-700"
-              >
-                Limpar Grid
-              </Button>
-            </div>
           </div>
 
-          {/* Center-Right Column - Grid Visualization */}
-          <div className="lg:col-span-9">
+          {/* Center Column - Grid Visualization */}
+          <div className="lg:col-span-6">
             <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -381,184 +328,236 @@ const RouteOptimization = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        {/* Bottom Section - Parameters and Estimates in Rectangular Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* Parameters Card */}
-          <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
-            <CardHeader>
-              <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Parâmetros de Estimativa</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              
-              {/* Tipo de Maquinário */}
-              <div className="space-y-2">
-                <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Tipo de Maquinário</Label>
-                <Select value={machineType} onValueChange={setMachineType}>
-                  <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="preparo-solo">Preparo do solo (Arado/Cultivador)</SelectItem>
-                    <SelectItem value="plantio">Plantio/Semeadura</SelectItem>
-                    <SelectItem value="pulverizacao">Pulverização</SelectItem>
-                    <SelectItem value="colheita">Colheita</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Right Column - Simulation Controls */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Drawing Mode Card */}
+            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+              <CardHeader>
+                <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Modo de Desenho</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {[
+                  { value: "empty", label: "Vazio", icon: Circle },
+                  { value: "obstacle", label: "Obstáculo", icon: Square },
+                  { value: "start", label: "Início", icon: MapPin },
+                  { value: "end", label: "Fim", icon: Flag },
+                  { value: "machine", label: "Máquina", icon: Tractor },
+                ].map((mode) => {
+                  const Icon = mode.icon;
+                  return (
+                    <button
+                      key={mode.value}
+                      onClick={() => setDrawMode(mode.value as DrawMode)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                        drawMode === mode.value
+                          ? "bg-blue-600 border-blue-500 text-white"
+                          : isDarkTheme
+                          ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-750"
+                          : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{mode.label}</span>
+                    </button>
+                  );
+                })}
+              </CardContent>
+            </Card>
 
-              {/* Número de Máquinas */}
-              <div className="space-y-2">
-                <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Número de Máquinas</Label>
-                <Select value={numMachines} onValueChange={setNumMachines}>
-                  <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5].map((num) => (
-                      <SelectItem key={num} value={String(num)}>
-                        {num} {num === 1 ? "Máquina" : "Máquinas"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Tamanho da Área */}
-              <div className="space-y-2">
-                <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>
-                  Tamanho da Área (m²)
-                </Label>
-                <Input
-                  type="number"
-                  value={areaSize}
-                  onChange={(e) => setAreaSize(e.target.value)}
-                  className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}
-                />
-              </div>
-
-              {/* Tipo de Solo */}
-              <div className="space-y-2">
-                <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Tipo de Solo</Label>
-                <Select value={soilType} onValueChange={setSoilType}>
-                  <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="arenoso">Arenoso</SelectItem>
-                    <SelectItem value="argiloso">Argiloso</SelectItem>
-                    <SelectItem value="areno-argiloso">Areno-Argiloso</SelectItem>
-                    <SelectItem value="organico">Orgânico</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Umidade do Solo */}
-              <div className="space-y-2">
-                <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Umidade do Solo</Label>
-                <Select value={soilMoisture} onValueChange={setSoilMoisture}>
-                  <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="seco">Seco</SelectItem>
-                    <SelectItem value="úmido">Úmido</SelectItem>
-                    <SelectItem value="encharcado">Encharcado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Inclinação do Terreno */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Inclinação do Terreno</Label>
-                  <span className={`text-sm font-semibold ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>
-                    {terrainSlope[0]}%
-                  </span>
+            {/* Parameters Card */}
+            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+              <CardHeader>
+                <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Parâmetros de Estimativa</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                
+                {/* Tipo de Maquinário */}
+                <div className="space-y-2">
+                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Tipo de Maquinário</Label>
+                  <Select value={machineType} onValueChange={setMachineType}>
+                    <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="preparo-solo">Preparo do solo (Arado/Cultivador)</SelectItem>
+                      <SelectItem value="plantio">Plantio/Semeadura</SelectItem>
+                      <SelectItem value="pulverizacao">Pulverização</SelectItem>
+                      <SelectItem value="colheita">Colheita</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Slider
-                  value={terrainSlope}
-                  onValueChange={setTerrainSlope}
-                  min={0}
-                  max={30}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
 
-              {/* Consumo de Combustível */}
-              <div className="space-y-2">
-                <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>
-                  Consumo de Combustível (L/h)
-                </Label>
-                <Input
-                  type="number"
-                  value={fuelConsumption}
-                  onChange={(e) => setFuelConsumption(e.target.value)}
-                  className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}
-                />
-              </div>
+                {/* Número de Máquinas */}
+                <div className="space-y-2">
+                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Número de Máquinas</Label>
+                  <Select value={numMachines} onValueChange={setNumMachines}>
+                    <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <SelectItem key={num} value={String(num)}>
+                          {num} {num === 1 ? "Máquina" : "Máquinas"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Tempo Máximo de Operação */}
-              <div className="space-y-2">
-                <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>
-                  Tempo Máximo de Operação (h)
-                </Label>
-                <Input
-                  type="number"
-                  value={maxOperationTime}
-                  onChange={(e) => setMaxOperationTime(e.target.value)}
-                  className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}
-                />
-              </div>
+                {/* Tamanho da Área */}
+                <div className="space-y-2">
+                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>
+                    Tamanho da Área (m²)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={areaSize}
+                    onChange={(e) => setAreaSize(e.target.value)}
+                    className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}
+                  />
+                </div>
 
-              {/* Calculate Button */}
-              <Button
-                onClick={handleCalculateEstimates}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Calculator className="w-4 h-4 mr-2" />
-                Calcular Estimativas
-              </Button>
-            </CardContent>
-          </Card>
+                {/* Tipo de Solo */}
+                <div className="space-y-2">
+                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Tipo de Solo</Label>
+                  <Select value={soilType} onValueChange={setSoilType}>
+                    <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="arenoso">Arenoso</SelectItem>
+                      <SelectItem value="argiloso">Argiloso</SelectItem>
+                      <SelectItem value="areno-argiloso">Areno-Argiloso</SelectItem>
+                      <SelectItem value="organico">Orgânico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {/* Estimates Results Card */}
-          <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
-            <CardHeader>
-              <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Estimativas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
-                <Label className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
-                  Área Total
-                </Label>
-                <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
-                  {areaSize} m²
-                </p>
-              </div>
+                {/* Umidade do Solo */}
+                <div className="space-y-2">
+                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Umidade do Solo</Label>
+                  <Select value={soilMoisture} onValueChange={setSoilMoisture}>
+                    <SelectTrigger className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="seco">Seco</SelectItem>
+                      <SelectItem value="úmido">Úmido</SelectItem>
+                      <SelectItem value="encharcado">Encharcado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
-                <Label className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
-                  Tempo Estimado
-                </Label>
-                <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
-                  {estimatedTime !== null ? `${estimatedTime} h` : "—"}
-                </p>
-              </div>
+                {/* Inclinação do Terreno */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>Inclinação do Terreno</Label>
+                    <span className={`text-sm font-semibold ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>
+                      {terrainSlope[0]}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={terrainSlope}
+                    onValueChange={setTerrainSlope}
+                    min={0}
+                    max={30}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
 
-              <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
-                <Label className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
-                  Combustível Estimado
-                </Label>
-                <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
-                  {estimatedFuel !== null ? `${estimatedFuel} L` : "—"}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Consumo de Combustível */}
+                <div className="space-y-2">
+                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>
+                    Consumo de Combustível (L/h)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={fuelConsumption}
+                    onChange={(e) => setFuelConsumption(e.target.value)}
+                    className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}
+                  />
+                </div>
+
+                {/* Tempo Máximo de Operação */}
+                <div className="space-y-2">
+                  <Label className={isDarkTheme ? "text-gray-300" : "text-gray-700"}>
+                    Tempo Máximo de Operação (h)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={maxOperationTime}
+                    onChange={(e) => setMaxOperationTime(e.target.value)}
+                    className={isDarkTheme ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}
+                  />
+                </div>
+
+                {/* Calculate Button */}
+                <Button
+                  onClick={handleCalculateEstimates}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Calcular Estimativas
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Estimates Results Card */}
+            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+              <CardHeader>
+                <CardTitle className={isDarkTheme ? "text-white" : "text-gray-900"}>Estimativas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
+                  <Label className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
+                    Área Total
+                  </Label>
+                  <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
+                    {areaSize} m²
+                  </p>
+                </div>
+
+                <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
+                  <Label className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
+                    Tempo Estimado
+                  </Label>
+                  <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
+                    {estimatedTime !== null ? `${estimatedTime} h` : "—"}
+                  </p>
+                </div>
+
+                <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-gray-800" : "bg-gray-100"}`}>
+                  <Label className={`text-sm ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
+                    Combustível Estimado
+                  </Label>
+                  <p className={`text-lg font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
+                    {estimatedFuel !== null ? `${estimatedFuel} L` : "—"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons Card */}
+            <Card className={isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}>
+              <CardContent className="pt-6 space-y-3">
+                <Button
+                  onClick={handleStartRoute}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Iniciar Rota
+                </Button>
+                <Button
+                  onClick={handleClearGrid}
+                  variant="destructive"
+                  className="w-full bg-red-600 hover:bg-red-700"
+                >
+                  Limpar Grid
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
         </div>
       </div>
