@@ -24,7 +24,7 @@ interface MachineCardProps {
 }
 
 const MachineCard = ({ machine, currentUserId, onDelete }: MachineCardProps) => {
-  const isOwner = currentUserId && machine.userId && currentUserId === machine.userId;
+  const isOwner = currentUserId && machine.user_id && currentUserId === machine.user_id;
 
   return (
     <Card className="overflow-hidden hover:shadow-medium transition-all duration-300 border-primary/20 hover:border-primary/40 animate-fade-in">
