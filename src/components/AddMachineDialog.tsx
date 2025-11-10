@@ -7,55 +7,82 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Machine } from "./MachineCard";
+import { machinesService } from "@/lib/machinesService";
 
 interface AddMachineDialogProps {
-  onAddMachine: (machine: Omit<Machine, "id">) => void;
+  onAddMachine: (machine: Machine) => void;
   machineTypes: string[];
+  currentUserId: string;
 }
 
-const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps) => {
+const AddMachineDialog = ({ onAddMachine, machineTypes, currentUserId }: AddMachineDialogProps) => {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     type: "",
     year: "",
-    usageTime: "",
+    usage_time: "",
     location: "",
     contact: "",
     image: ""
   });
   const [imagePreview, setImagePreview] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
-    if (!formData.name || !formData.type || !formData.year || !formData.usageTime || !formData.location || !formData.contact) {
+    if (!formData.name || !formData.type || !formData.year || !formData.usage_time || !formData.location || !formData.contact) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
+      setLoading(false);
       return;
     }
 
-    onAddMachine({
-      name: formData.name,
-      type: formData.type,
-      year: parseInt(formData.year),
-      usageTime: formData.usageTime,
-      location: formData.location,
-      contact: formData.contact,
-      image: formData.image || "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800"
-    });
+    try {
+      const newMachine = await machinesService.addMachine({
+        name: formData.name,
+        type: formData.type,
+        year: parseInt(formData.year),
+        usage_time: formData.usage_time,
+        location: formData.location,
+        contact: formData.contact,
+        image: formData.image || "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800",
+        user_id: currentUserId
+      });
 
-    toast.success("Máquina cadastrada com sucesso!");
-    setFormData({
-      name: "",
-      type: "",
-      year: "",
-      usageTime: "",
-      location: "",
-      contact: "",
-      image: ""
-    });
-    setImagePreview("");
-    setOpen(false);
+      onAddMachine(newMachine);
+      toast.success("Máquina cadastrada com sucesso!");
+      
+      // Reset form
+      setFormData({
+        name: "",
+        type: "",
+        year: "",
+        usage_time: "",
+        location: "",
+        contact: "",
+        image: ""
+      });
+      setImagePreview("");
+      setOpen(false);
+    } catch (error: any) {
+      toast.error("Erro ao cadastrar máquina: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = (file: File) => {
+    // Por enquanto vamos usar URLs estáticas
+    // Em produção, você pode implementar upload para o Supabase Storage
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setFormData({ ...formData, image: result });
+      setImagePreview(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -81,6 +108,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: Trator John Deere 6110J"
+              required
             />
           </div>
 
@@ -111,16 +139,18 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
                 placeholder="2020"
                 min="1950"
                 max={new Date().getFullYear()}
+                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="usageTime">Tempo de Uso *</Label>
+              <Label htmlFor="usage_time">Tempo de Uso *</Label>
               <Input
-                id="usageTime"
-                value={formData.usageTime}
-                onChange={(e) => setFormData({ ...formData, usageTime: e.target.value })}
+                id="usage_time"
+                value={formData.usage_time}
+                onChange={(e) => setFormData({ ...formData, usage_time: e.target.value })}
                 placeholder="500 horas"
+                required
               />
             </div>
           </div>
@@ -132,6 +162,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="Ex: São Paulo, SP"
+              required
             />
           </div>
 
@@ -142,6 +173,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
               value={formData.contact}
               onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
               placeholder="(11) 99999-9999"
+              required
             />
           </div>
 
@@ -155,13 +187,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      const result = reader.result as string;
-                      setFormData({ ...formData, image: result });
-                      setImagePreview(result);
-                    };
-                    reader.readAsDataURL(file);
+                    handleImageUpload(file);
                   }
                 }}
                 className="cursor-pointer"
@@ -178,8 +204,13 @@ const AddMachineDialog = ({ onAddMachine, machineTypes }: AddMachineDialogProps)
             </div>
           </div>
 
-          <Button type="submit" className="w-full" variant="default">
-            Cadastrar Máquina
+          <Button 
+            type="submit" 
+            className="w-full" 
+            variant="default"
+            disabled={loading}
+          >
+            {loading ? "Cadastrando..." : "Cadastrar Máquina"}
           </Button>
         </form>
       </DialogContent>

@@ -9,11 +9,12 @@ export interface Machine {
   name: string;
   type: string;
   year: number;
-  usageTime: string;
+  usage_time: string; // Mudei para snake_case para bater com o banco
   location: string;
   contact: string;
   image: string;
-  userId?: string;
+  user_id: string;
+  created_at?: string;
 }
 
 interface MachineCardProps {
@@ -75,7 +76,7 @@ const MachineCard = ({ machine, currentUserId, onDelete }: MachineCardProps) => 
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
-            <span>Uso: <span className="font-semibold text-foreground">{machine.usageTime}</span></span>
+            <span>Uso: <span className="font-semibold text-foreground">{machine.usage_time}</span></span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" />

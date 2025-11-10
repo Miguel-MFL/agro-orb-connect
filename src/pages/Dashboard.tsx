@@ -4,14 +4,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tractor, Route, CheckCircle, TrendingUp, Zap, Users } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-farm.jpg";
+import { supabase } from "@/lib/supabase";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    toast.success("Logout realizado com sucesso!");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      localStorage.removeItem("currentUser");
+      toast.success("Logout realizado com sucesso!");
+      navigate("/login");
+    } catch (error: any) {
+      toast.error("Erro ao fazer logout");
+      console.error("Logout error:", error);
+    }
   };
 
   const benefits = [
@@ -46,13 +55,18 @@ const Dashboard = () => {
             <Tractor className="w-8 h-8" />
             <h1 className="text-2xl font-bold">Orna</h1>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleLogout}
-            className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
-          >
-            Sair
-          </Button>
+          <div className="flex items-center gap-4">
+            <span className="text-primary-foreground/80">
+              Bem-vindo, {JSON.parse(localStorage.getItem("currentUser") || '{"fullName":"Usuário"}').fullName}
+            </span>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            >
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -101,7 +115,7 @@ const Dashboard = () => {
             <div className="relative w-80 h-80">
               {/* Left Half - Route Optimization */}
               <button
-                onClick={() => navigate("/routes-optimization")}
+                onClick={() => navigate("/route-optimization")}
                 className="absolute left-0 top-0 w-40 h-80 bg-gradient-hero rounded-l-full flex items-center justify-center group hover:scale-105 transition-transform duration-300 shadow-strong border-r-2 border-primary-foreground"
               >
                 <div className="text-center px-4">
