@@ -8,6 +8,7 @@ import { Tractor } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-farm.jpg";
 import { z } from "zod";
+import { useAuth } from "@/hooks/useAuth";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Email inválido" }),
@@ -17,6 +18,8 @@ const authSchema = z.object({
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signUp, signIn, loading: authLoading } = useAuth();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -24,14 +27,18 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Redireciona se já estiver logado
-    const user = localStorage.getItem("currentUser");
-    if (user) {
-      navigate("/");
-    }
+    // Verificar se já está autenticado
+    const checkAuth = async () => {
+      const user = localStorage.getItem("currentUser");
+      if (user) {
+        navigate("/");
+      }
+    };
+    
+    checkAuth();
   }, [navigate]);
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -49,55 +56,42 @@ const Login = () => {
         return;
       }
 
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-
       if (isSignUp) {
         // Cadastro
-        const userExists = users.find((u: any) => u.email === email);
-        if (userExists) {
-          toast.error("Usuário já cadastrado");
-          setLoading(false);
+        const { error } = await signUp(email, password, fullName);
+        if (error) {
+          toast.error(error);
           return;
         }
-
-        const newUser = {
-          id: Date.now().toString(),
-          email: validation.data.email,
-          password: validation.data.password,
-          fullName: fullName || "Usuário",
-          createdAt: new Date().toISOString()
-        };
-
-        users.push(newUser);
-        localStorage.setItem("users", JSON.stringify(users));
-        toast.success("Cadastro realizado com sucesso! Você já pode fazer login.");
+        
+        toast.success("Cadastro realizado com sucesso! Verifique seu email para confirmar a conta.");
         setIsSignUp(false);
         setEmail("");
         setPassword("");
         setFullName("");
       } else {
-        // Login - permite acesso direto
-        let user = users.find((u: any) => u.email === email && u.password === password);
-        
-        // Se não encontrou usuário, cria automaticamente
-        if (!user) {
-          user = {
-            id: Date.now().toString(),
-            email: validation.data.email,
-            password: validation.data.password,
-            fullName: "Usuário",
-            createdAt: new Date().toISOString()
-          };
-          users.push(user);
-          localStorage.setItem("users", JSON.stringify(users));
+        // Login
+        const { data, error } = await signIn(email, password);
+        if (error) {
+          toast.error(error);
+          return;
         }
-
-        localStorage.setItem("currentUser", JSON.stringify(user));
-        toast.success("Login realizado com sucesso!");
-        navigate("/");
+        
+        if (data.user) {
+          // Salvar informações do usuário no localStorage
+          localStorage.setItem("currentUser", JSON.stringify({
+            id: data.user.id,
+            email: data.user.email,
+            fullName: data.user.user_metadata?.full_name || "Usuário"
+          }));
+          
+          toast.success("Login realizado com sucesso!");
+          navigate("/");
+        }
       }
     } catch (error: any) {
       toast.error("Ocorreu um erro. Tente novamente.");
+      console.error("Auth error:", error);
     } finally {
       setLoading(false);
     }
@@ -169,9 +163,9 @@ const Login = () => {
               className="w-full" 
               size="lg"
               variant="default"
-              disabled={loading}
+              disabled={loading || authLoading}
             >
-              {loading ? "Processando..." : (isSignUp ? "Cadastrar" : "Entrar")}
+              {loading || authLoading ? "Processando..." : (isSignUp ? "Cadastrar" : "Entrar")}
             </Button>
             <div className="text-center">
               <Button

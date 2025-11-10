@@ -23,7 +23,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/machines" element={<ProtectedRoute><Machines /></ProtectedRoute>} />
-          <Route path="/routes-optimization" element={<ProtectedRoute><RouteOptimization /></ProtectedRoute>} />
+          {/* CORREÇÃO: Mudar de "routes-optimization" para "route-optimization" */}
+          <Route path="/route-optimization" element={<ProtectedRoute><RouteOptimization /></ProtectedRoute>} />
           <Route path="/food-quote" element={<ProtectedRoute><FoodQuote /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
