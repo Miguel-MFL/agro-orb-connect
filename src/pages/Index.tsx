@@ -1,10 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tractor, Fuel, Clock, DollarSign, MapPin, Leaf, ShieldCheck, BrainCircuit } from "lucide-react";
+import { Tractor, Fuel, Clock, DollarSign, MapPin, Leaf, ShieldCheck, BrainCircuit, Users, BarChart3, Settings, TrendingUp, Award } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
+
+  const additionalReasons = [
+    {
+      icon: Users,
+      title: "Compartilhamento de Máquinas",
+      description: "Alugue ou disponibilize máquinas agrícolas de forma prática e segura, otimizando o uso de equipamentos.",
+    },
+    {
+      icon: BarChart3,
+      title: "Análise de Desempenho",
+      description: "Acompanhe métricas detalhadas de produtividade e eficiência das operações em tempo real.",
+    },
+    {
+      icon: Settings,
+      title: "Manutenção Preventiva",
+      description: "Sistema inteligente que alerta sobre necessidades de manutenção antes que problemas ocorram.",
+    },
+    {
+      icon: TrendingUp,
+      title: "Gestão Financeira",
+      description: "Controle completo de custos, receitas e ROI de cada operação e equipamento.",
+    },
+    {
+      icon: Award,
+      title: "Certificações e Conformidade",
+      description: "Documentação automática para atender requisitos de certificações agrícolas e auditorias.",
+    },
+  ];
 
   const benefits = [
     {
@@ -75,6 +103,39 @@ const Index = () => {
           >
             Acessar Simulador de Rotas
           </Button>
+        </div>
+      </section>
+
+      {/* Additional Reasons Section */}
+      <section className="py-16 px-6 bg-muted/30">
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            Por que escolher o nosso sistema?
+          </h2>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Funcionalidades exclusivas que fazem a diferença na gestão da sua propriedade
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {additionalReasons.map((reason, index) => {
+              const Icon = reason.icon;
+              return (
+                <Card key={index} className="hover:shadow-lg transition-all hover:-translate-y-1 border-primary/20">
+                  <CardHeader>
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-lg">{reason.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm">
+                      {reason.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </section>
 
