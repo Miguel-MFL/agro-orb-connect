@@ -102,12 +102,12 @@ const AddMachineDialog = ({ onAddMachine, machineTypes, currentUserId }: AddMach
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome da Máquina *</Label>
+            <Label htmlFor="name">Nome do Proprietário *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ex: Trator John Deere 6110J"
+              placeholder="Ex: João Silva"
               required
             />
           </div>
