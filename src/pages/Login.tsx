@@ -114,7 +114,7 @@ const Login = () => {
           <div className="mx-auto bg-primary rounded-full p-4 w-20 h-20 flex items-center justify-center shadow-medium">
             <Tractor className="w-10 h-10 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-bold text-primary">Orna</CardTitle>
+          <CardTitle className="text-3xl font-bold text-primary">Orma</CardTitle>
           <CardDescription className="text-base">
             {isSignUp ? "Crie sua conta" : "Sistema de Gestão Agrícola"}
           </CardDescription>

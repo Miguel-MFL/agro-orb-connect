@@ -109,7 +109,7 @@ const FoodQuote = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <ShoppingCart className="w-8 h-8" />
-            <h1 className="text-2xl font-bold">Orna - Cotação de Alimentos</h1>
+            <h1 className="text-2xl font-bold">Orma - Cotação de Alimentos</h1>
           </div>
           <Button 
             variant="outline" 

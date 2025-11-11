@@ -79,6 +79,7 @@ const Machines = () => {
   const filteredMachines = machines.filter((machine) => {
     const matchesType = searchType === "all" || machine.type === searchType;
     const matchesQuery = machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        machine.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         machine.location.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesType && matchesQuery;
   });
@@ -90,7 +91,7 @@ const Machines = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Tractor className="w-8 h-8" />
-            <h1 className="text-2xl font-bold">Orna - Aluguel de Máquinas</h1>
+            <h1 className="text-2xl font-bold">Orma - Aluguel de Máquinas</h1>
           </div>
           <div className="flex items-center gap-4">
             <Button 
@@ -146,7 +147,6 @@ const Machines = () => {
             {currentUser && (
               <AddMachineDialog 
                 onAddMachine={handleAddMachine} 
-                machineTypes={MACHINE_TYPES}
                 currentUserId={currentUser.id}
               />
             )}
@@ -178,7 +178,6 @@ const Machines = () => {
             {currentUser && (
               <AddMachineDialog 
                 onAddMachine={handleAddMachine} 
-                machineTypes={MACHINE_TYPES}
                 currentUserId={currentUser.id}
               />
             )}

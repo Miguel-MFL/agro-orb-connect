@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Machine } from "./MachineCard";
@@ -11,16 +10,15 @@ import { machinesService } from "@/lib/machinesService";
 
 interface AddMachineDialogProps {
   onAddMachine: (machine: Machine) => void;
-  machineTypes: string[];
   currentUserId: string;
 }
 
-const AddMachineDialog = ({ onAddMachine, machineTypes, currentUserId }: AddMachineDialogProps) => {
+const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    type: "",
+    model: "",
     year: "",
     usage_time: "",
     location: "",
@@ -33,7 +31,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes, currentUserId }: AddMach
     e.preventDefault();
     setLoading(true);
     
-    if (!formData.name || !formData.type || !formData.year || !formData.usage_time || !formData.location || !formData.contact) {
+    if (!formData.name || !formData.model || !formData.year || !formData.usage_time || !formData.location || !formData.contact) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       setLoading(false);
       return;
@@ -42,7 +40,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes, currentUserId }: AddMach
     try {
       const newMachine = await machinesService.addMachine({
         name: formData.name,
-        type: formData.type,
+        type: formData.model,
         year: parseInt(formData.year),
         usage_time: formData.usage_time,
         location: formData.location,
@@ -57,7 +55,7 @@ const AddMachineDialog = ({ onAddMachine, machineTypes, currentUserId }: AddMach
       // Reset form
       setFormData({
         name: "",
-        type: "",
+        model: "",
         year: "",
         usage_time: "",
         location: "",
@@ -113,19 +111,14 @@ const AddMachineDialog = ({ onAddMachine, machineTypes, currentUserId }: AddMach
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="type">Tipo de Máquina *</Label>
-            <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {machineTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="model">Modelo da Máquina *</Label>
+            <Input
+              id="model"
+              value={formData.model}
+              onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+              placeholder="Ex: John Deere 6110J"
+              required
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

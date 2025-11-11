@@ -53,7 +53,7 @@ const Dashboard = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Tractor className="w-8 h-8" />
-            <h1 className="text-2xl font-bold">Orna</h1>
+            <h1 className="text-2xl font-bold">Orma</h1>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-primary-foreground/80">
