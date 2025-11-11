@@ -23,9 +23,9 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
     usage_time: "",
     location: "",
     contact: "",
-    image: ""
+    images: [] as string[]
   });
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +45,7 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
         usage_time: formData.usage_time,
         location: formData.location,
         contact: formData.contact,
-        image: formData.image || "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800",
+        images: formData.images.length > 0 ? formData.images : ["https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800"],
         user_id: currentUserId
       });
 
@@ -60,9 +60,9 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
         usage_time: "",
         location: "",
         contact: "",
-        image: ""
+        images: []
       });
-      setImagePreview("");
+      setImagePreviews([]);
       setOpen(false);
     } catch (error: any) {
       toast.error("Erro ao cadastrar máquina: " + error.message);
@@ -71,16 +71,42 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
     }
   };
 
-  const handleImageUpload = (file: File) => {
-    // Por enquanto vamos usar URLs estáticas
-    // Em produção, você pode implementar upload para o Supabase Storage
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setFormData({ ...formData, image: result });
-      setImagePreview(result);
-    };
-    reader.readAsDataURL(file);
+  const handleImageUpload = (files: FileList) => {
+    const maxImages = 5;
+    const currentImagesCount = formData.images.length;
+    const remainingSlots = maxImages - currentImagesCount;
+    
+    if (remainingSlots <= 0) {
+      toast.error(`Você pode adicionar no máximo ${maxImages} fotos`);
+      return;
+    }
+
+    const filesToProcess = Array.from(files).slice(0, remainingSlots);
+    
+    filesToProcess.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, result]
+        }));
+        setImagePreviews(prev => [...prev, result]);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    if (files.length > remainingSlots) {
+      toast.info(`Apenas ${remainingSlots} foto(s) foi(foram) adicionada(s). Limite: ${maxImages} fotos`);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -171,29 +197,47 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image">Foto da Máquina</Label>
+            <Label htmlFor="images">Fotos da Máquina (até 5)</Label>
             <div className="space-y-3">
               <Input
-                id="image"
+                id="images"
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleImageUpload(file);
+                  const files = e.target.files;
+                  if (files && files.length > 0) {
+                    handleImageUpload(files);
                   }
                 }}
                 className="cursor-pointer"
+                disabled={formData.images.length >= 5}
               />
-              {imagePreview && (
-                <div className="relative w-full h-40 rounded-md overflow-hidden border border-border">
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
-                    className="w-full h-full object-cover"
-                  />
+              {imagePreviews.length > 0 && (
+                <div className="grid grid-cols-2 gap-2">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative w-full h-32 rounded-md overflow-hidden border border-border group">
+                      <img 
+                        src={preview} 
+                        alt={`Preview ${index + 1}`} 
+                        className="w-full h-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeImage(index)}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
+              <p className="text-xs text-muted-foreground">
+                {formData.images.length}/5 fotos adicionadas
+              </p>
             </div>
           </div>
 

@@ -8,7 +8,7 @@ export interface Machine {
   usage_time: string;
   location: string;
   contact: string;
-  image: string;
+  images: string[];
   user_id: string;
   created_at: string;
 }
