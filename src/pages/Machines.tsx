@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tractor, Search, ArrowLeft, RefreshCw } from "lucide-react";
 import MachineCard, { Machine } from "@/components/MachineCard";
 import AddMachineDialog from "@/components/AddMachineDialog";
@@ -10,28 +9,10 @@ import { machinesService } from "@/lib/machinesService";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
-const MACHINE_TYPES = [
-  "Trator Agrícola Compacto",
-  "Plantadeira Autotransportável",
-  "Pulverizador de Arrasto",
-  "Pulverizador Montado (de Barra)",
-  "Distribuidor de Fertilizantes de Arrasto",
-  "Semeadeira de Precisão Dobrável",
-  "Arado de Aiveca",
-  "Grade Niveladora Leve",
-  "Carreta Agrícola (Reboque)",
-  "Roçadeira Rotativa",
-  "Subsolador (Implemento)",
-  "Enfardadora de Feno Compacta",
-  "Plaina Agrícola (Lâmina Niveladora)",
-  "Colhedora de Pequenas Culturas",
-  "Perfurador de Solo (Implemento)"
-];
 
 const Machines = () => {
   const navigate = useNavigate();
   const [machines, setMachines] = useState<Machine[]>([]);
-  const [searchType, setSearchType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -77,11 +58,10 @@ const Machines = () => {
   };
 
   const filteredMachines = machines.filter((machine) => {
-    const matchesType = searchType === "all" || machine.type === searchType;
     const matchesQuery = machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         machine.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         machine.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesQuery;
+    return matchesQuery;
   });
 
   return (
@@ -124,26 +104,13 @@ const Machines = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nome ou localização..."
+                  placeholder="Buscar por nome, tipo ou localização..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 border-primary/30 focus:border-primary"
                 />
               </div>
             </div>
-            <Select value={searchType} onValueChange={setSearchType}>
-              <SelectTrigger className="w-full md:w-80 border-primary/30">
-                <SelectValue placeholder="Filtrar por tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Tipos</SelectItem>
-                {MACHINE_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             {currentUser && (
               <AddMachineDialog 
                 onAddMachine={handleAddMachine} 
