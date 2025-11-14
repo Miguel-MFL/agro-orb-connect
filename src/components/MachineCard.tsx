@@ -81,35 +81,6 @@ const MachineCard = ({ machine, currentUserId, onDelete }: MachineCardProps) => 
             </div>
           </>
         )}
-        {isOwner && onDelete && (
-          <div className="absolute top-2 right-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="destructive" 
-                  size="icon"
-                  className="shadow-strong"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Excluir máquina?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja excluir "{machine.name}"? Esta ação não pode ser desfeita.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onDelete(machine.id)}>
-                    Excluir
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        )}
       </div>
       <CardContent className="pt-4 space-y-3">
         <div>
@@ -123,7 +94,7 @@ const MachineCard = ({ machine, currentUserId, onDelete }: MachineCardProps) => 
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
-            <span>Uso: <span className="font-semibold text-foreground">{machine.usage_time}</span></span>
+            <span>Horas de uso: <span className="font-semibold text-foreground">{machine.usage_time}</span></span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" />
