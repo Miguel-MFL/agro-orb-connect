@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Tractor, Search, ArrowLeft, RefreshCw } from "lucide-react";
 import MachineCard, { Machine } from "@/components/MachineCard";
 import AddMachineDialog from "@/components/AddMachineDialog";
+import MyMachinesDialog from "@/components/MyMachinesDialog";
 import { machinesService } from "@/lib/machinesService";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -57,6 +58,10 @@ const Machines = () => {
     }
   };
 
+  const handleUpdateMachine = (updatedMachine: Machine) => {
+    setMachines(machines.map(m => m.id === updatedMachine.id ? updatedMachine : m));
+  };
+
   const filteredMachines = machines.filter((machine) => {
     const matchesQuery = machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         machine.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -83,6 +88,13 @@ const Machines = () => {
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
+            {currentUser && (
+              <MyMachinesDialog 
+                currentUserId={currentUser.id}
+                onDeleteMachine={handleDeleteMachine}
+                onUpdateMachine={handleUpdateMachine}
+              />
+            )}
             <Button 
               variant="ghost" 
               onClick={() => navigate("/")}

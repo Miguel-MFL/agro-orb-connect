@@ -88,5 +88,22 @@ export const machinesService = {
     }
 
     return data || [];
+  },
+
+  // Atualizar máquina
+  async updateMachine(machineId: string, machine: Partial<Omit<Machine, 'id' | 'created_at' | 'user_id'>>): Promise<Machine> {
+    const { data, error } = await supabase
+      .from('machines')
+      .update(machine)
+      .eq('id', machineId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao atualizar máquina:', error);
+      throw error;
+    }
+
+    return data;
   }
 };
