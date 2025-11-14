@@ -116,7 +116,7 @@ const MyMachinesDialog = ({ currentUserId, onDeleteMachine, onUpdateMachine }: M
                       <div className="text-sm text-muted-foreground space-y-1 mt-2">
                         <p><span className="font-medium">Tipo:</span> {machine.type}</p>
                         <p><span className="font-medium">Ano:</span> {machine.year}</p>
-                        <p><span className="font-medium">Tempo de uso:</span> {machine.usage_time}</p>
+                        <p><span className="font-medium">Horas de uso:</span> {machine.usage_time}</p>
                         <p><span className="font-medium">Localização:</span> {machine.location}</p>
                         <p><span className="font-medium">Contato:</span> {machine.contact}</p>
                       </div>
