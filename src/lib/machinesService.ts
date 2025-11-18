@@ -11,6 +11,7 @@ export interface Machine {
   images: string[];
   user_id: string;
   created_at: string;
+  hourly_price?: number;
 }
 
 export const machinesService = {

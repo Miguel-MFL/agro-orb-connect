@@ -30,12 +30,13 @@ const EditMachineDialog = ({ machine, open, onOpenChange, onEditMachine }: EditM
     usage_time: machine.usage_time,
     location: machine.location,
     contact: machine.contact,
+    hourly_price: machine.hourly_price || 0,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.type || !formData.year || !formData.usage_time || !formData.location || !formData.contact) {
+    if (!formData.name || !formData.type || !formData.year || !formData.usage_time || !formData.location || !formData.contact || !formData.hourly_price) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
@@ -125,6 +126,20 @@ const EditMachineDialog = ({ machine, open, onOpenChange, onEditMachine }: EditM
               value={formData.contact}
               onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
               placeholder="Ex: (11) 98765-4321"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="hourly_price">Preço por Hora (R$) *</Label>
+            <Input
+              id="hourly_price"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.hourly_price}
+              onChange={(e) => setFormData({ ...formData, hourly_price: parseFloat(e.target.value) })}
+              placeholder="Ex: 150.00"
               required
             />
           </div>

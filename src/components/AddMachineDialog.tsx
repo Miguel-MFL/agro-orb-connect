@@ -23,6 +23,7 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
     usage_time: "",
     location: "",
     contact: "",
+    hourly_price: "",
     images: [] as string[]
   });
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -31,7 +32,7 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
     e.preventDefault();
     setLoading(true);
     
-    if (!formData.name || !formData.model || !formData.year || !formData.usage_time || !formData.location || !formData.contact) {
+    if (!formData.name || !formData.model || !formData.year || !formData.usage_time || !formData.location || !formData.contact || !formData.hourly_price) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       setLoading(false);
       return;
@@ -45,6 +46,7 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
         usage_time: formData.usage_time,
         location: formData.location,
         contact: formData.contact,
+        hourly_price: parseFloat(formData.hourly_price),
         images: formData.images.length > 0 ? formData.images : ["https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800"],
         user_id: currentUserId
       });
@@ -60,6 +62,7 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
         usage_time: "",
         location: "",
         contact: "",
+        hourly_price: "",
         images: []
       });
       setImagePreviews([]);
@@ -192,6 +195,20 @@ const AddMachineDialog = ({ onAddMachine, currentUserId }: AddMachineDialogProps
               value={formData.contact}
               onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
               placeholder="(11) 99999-9999"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="hourly_price">Preço por Hora (R$) *</Label>
+            <Input
+              id="hourly_price"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.hourly_price}
+              onChange={(e) => setFormData({ ...formData, hourly_price: e.target.value })}
+              placeholder="Ex: 150.00"
               required
             />
           </div>

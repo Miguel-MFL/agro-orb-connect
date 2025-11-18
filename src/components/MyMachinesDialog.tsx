@@ -182,6 +182,9 @@ const MyMachinesDialog = ({ currentUserId, onDeleteMachine, onUpdateMachine }: M
                             <p><span className="font-medium">Horas de uso:</span> {machine.usage_time}</p>
                             <p><span className="font-medium">Localização:</span> {machine.location}</p>
                             <p><span className="font-medium">Contato:</span> {machine.contact}</p>
+                            {machine.hourly_price && (
+                              <p><span className="font-medium">Preço/hora:</span> R$ {machine.hourly_price.toFixed(2)}</p>
+                            )}
                           </div>
                         </div>
                         

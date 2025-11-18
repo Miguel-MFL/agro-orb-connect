@@ -16,6 +16,7 @@ export interface Machine {
   images: string[];
   user_id: string;
   created_at?: string;
+  hourly_price?: number;
 }
 
 interface MachineCardProps {
@@ -85,7 +86,14 @@ const MachineCard = ({ machine, currentUserId, onDelete }: MachineCardProps) => 
       <CardContent className="pt-4 space-y-3">
         <div>
           <h3 className="font-bold text-lg text-foreground mb-1">{machine.name}</h3>
-          <Badge variant="secondary" className="text-xs">{machine.type}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs">{machine.type}</Badge>
+            {machine.hourly_price && (
+              <Badge variant="default" className="text-xs font-semibold">
+                R$ {machine.hourly_price.toFixed(2)}/hora
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">

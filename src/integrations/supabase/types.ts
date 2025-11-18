@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           contact: string
           created_at: string
+          hourly_price: number | null
           id: string
           images: string[] | null
           location: string
@@ -31,6 +32,7 @@ export type Database = {
         Insert: {
           contact: string
           created_at?: string
+          hourly_price?: number | null
           id?: string
           images?: string[] | null
           location: string
@@ -44,6 +46,7 @@ export type Database = {
         Update: {
           contact?: string
           created_at?: string
+          hourly_price?: number | null
           id?: string
           images?: string[] | null
           location?: string
