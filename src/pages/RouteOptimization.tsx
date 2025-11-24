@@ -50,7 +50,7 @@ const RouteOptimization = () => {
     percentualCobertura: number;
   } | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [animationSpeed, setAnimationSpeed] = useState([300]);
+  const [animationSpeed, setAnimationSpeed] = useState([5]); // Agora é um multiplicador de velocidade (1-10)
   const [currentPathIndex, setCurrentPathIndex] = useState(0);
   const [machinePosition, setMachinePosition] = useState<Position | null>(null);
   const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -114,7 +114,13 @@ const RouteOptimization = () => {
   const resetAnimation = () => {
     stopAnimation();
     setCurrentPathIndex(0);
-    setMachinePosition(calculatedPath.length > 0 ? calculatedPath[0] : null);
+    
+    // Define a posição inicial da máquina
+    if (calculatedPath.length > 0) {
+      setMachinePosition(calculatedPath[0]);
+    } else {
+      setMachinePosition(null);
+    }
     
     // Limpa a visualização do caminho, mas mantém os marcadores
     const newGrid: Cell[][] = grid.map(row => row.map(cell => {
@@ -136,6 +142,11 @@ const RouteOptimization = () => {
     if (currentPathIndex >= calculatedPath.length) {
       resetAnimation();
     }
+    
+    // Garante que a máquina comece no primeiro ponto da rota
+    if (currentPathIndex === 0 && calculatedPath.length > 0) {
+      setMachinePosition(calculatedPath[0]);
+    }
 
     setIsAnimating(true);
   };
@@ -147,6 +158,10 @@ const RouteOptimization = () => {
   // Effect para controlar a animação
   useEffect(() => {
     if (!isAnimating || calculatedPath.length === 0) return;
+
+    // Calcula o intervalo baseado na velocidade (inverte para que valores maiores = mais rápido)
+    // Velocidade vai de 1 (lento = 500ms) a 10 (rápido = 50ms)
+    const interval = Math.max(50, 550 - (animationSpeed[0] * 50));
 
     animationIntervalRef.current = setInterval(() => {
       setCurrentPathIndex((prevIndex) => {
@@ -175,7 +190,7 @@ const RouteOptimization = () => {
 
         return nextIndex;
       });
-    }, animationSpeed[0]);
+    }, interval);
 
     return () => {
       if (animationIntervalRef.current) {
@@ -276,33 +291,19 @@ const RouteOptimization = () => {
       row.map(cell => (cell.type === "obstacle" ? 1 : 0))
     );
 
-    // Encontra o ponto de início (marcado como "start" ou primeira célula vazia)
-    let pontoInicial: Ponto | null = null;
+    // Encontra o ponto de início (DEVE estar marcado como "start")
     const startPos = findPosition(grid, "start");
     
-    if (startPos) {
-      pontoInicial = { row: startPos.row, col: startPos.col };
-    } else {
-      // Se não há ponto marcado como início, usa a primeira célula vazia
-      for (let row = 0; row < grid.length; row++) {
-        for (let col = 0; col < grid[row].length; col++) {
-          if (grid[row][col].type === "empty") {
-            pontoInicial = { row, col };
-            break;
-          }
-        }
-        if (pontoInicial) break;
-      }
-    }
-
-    if (!pontoInicial) {
-      toast.error("Não há células vazias no grid!");
+    if (!startPos) {
+      toast.error("Marque um ponto de INÍCIO no grid antes de calcular a cobertura!");
       return;
     }
 
-    toast.info("Calculando rota de cobertura total...");
+    const pontoInicial: Ponto = { row: startPos.row, col: startPos.col };
 
-    // Gera a rota otimizada
+    toast.info("Calculando rota de cobertura total a partir do ponto inicial...");
+
+    // Gera a rota otimizada começando do ponto inicial
     const rota = gerarRotaOtimizada(mapa, pontoInicial);
 
     if (!rota || rota.length === 0) {
@@ -324,6 +325,10 @@ const RouteOptimization = () => {
 
     setGrid(newGrid);
     setCalculatedPath(rota);
+    
+    // Inicializa a posição da máquina no ponto inicial
+    setMachinePosition(rota[0]);
+    setCurrentPathIndex(0);
 
     // Calcula estatísticas
     const stats = calcularEstatisticasRota(rota);
@@ -839,23 +844,23 @@ const RouteOptimization = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <Label className={`text-xs ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
-                        Velocidade
+                        Velocidade da Animação
                       </Label>
                       <span className={`text-xs font-semibold ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>
-                        {animationSpeed[0]}ms
+                        {animationSpeed[0]}x
                       </span>
                     </div>
                     <Slider
                       value={animationSpeed}
                       onValueChange={setAnimationSpeed}
-                      min={50}
-                      max={1000}
-                      step={50}
+                      min={1}
+                      max={10}
+                      step={1}
                       className="w-full"
                       disabled={isAnimating}
                     />
                     <p className={`text-xs ${isDarkTheme ? "text-gray-500" : "text-gray-500"}`}>
-                      {animationSpeed[0] < 200 ? "Muito rápida" : animationSpeed[0] < 400 ? "Rápida" : animationSpeed[0] < 700 ? "Média" : "Lenta"}
+                      {animationSpeed[0] <= 3 ? "Lenta" : animationSpeed[0] <= 6 ? "Média" : "Rápida"}
                     </p>
                   </div>
 
