@@ -9,6 +9,7 @@ import MyMachinesDialog from "@/components/MyMachinesDialog";
 import { machinesService } from "@/lib/machinesService";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import ormaLogo from "@/assets/orma-logo.png";
 
 
 const Machines = () => {
@@ -75,7 +76,7 @@ const Machines = () => {
       <header className="bg-gradient-hero text-primary-foreground py-4 px-6 shadow-medium">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Tractor className="w-8 h-8" />
+            <img src={ormaLogo} alt="Orma Logo" className="w-8 h-8" />
             <h1 className="text-2xl font-bold">Orma - Aluguel de Máquinas</h1>
           </div>
           <div className="flex items-center gap-4">

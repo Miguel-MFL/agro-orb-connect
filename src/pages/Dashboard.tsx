@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tractor, Route, CheckCircle, TrendingUp, Zap, Users } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-farm.jpg";
+import ormaLogo from "@/assets/orma-logo.png";
 import { supabase } from "@/lib/supabase";
 
 const Dashboard = () => {
@@ -52,7 +53,7 @@ const Dashboard = () => {
       <header className="bg-gradient-hero text-primary-foreground py-4 px-6 shadow-medium">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Tractor className="w-8 h-8" />
+            <img src={ormaLogo} alt="Orma Logo" className="w-8 h-8" />
             <h1 className="text-2xl font-bold">Orma</h1>
           </div>
           <div className="flex items-center gap-4">

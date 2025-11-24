@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tractor, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-farm.jpg";
+import ormaLogo from "@/assets/orma-logo.png";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -111,7 +112,10 @@ const Login = () => {
       {/* Auth Card */}
       <Card className="w-full max-w-md mx-4 relative z-10 shadow-strong border-primary/20 animate-fade-in">
         <CardHeader className="space-y-4 text-center">
-          <CardTitle className="text-3xl font-bold text-primary">Orma</CardTitle>
+          <div className="flex items-center justify-center gap-3">
+            <img src={ormaLogo} alt="Orma Logo" className="w-12 h-12" />
+            <CardTitle className="text-3xl font-bold text-primary">Orma</CardTitle>
+          </div>
           <CardDescription className="text-base">
             {isSignUp ? "Crie sua conta" : "Sistema de Gestão Agrícola"}
           </CardDescription>
