@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Tractor, ArrowLeft, Circle, Square, ZoomIn, ZoomOut, MapPin, Flag, Sun, Moon, Calculator } from "lucide-react";
+import { Tractor, ArrowLeft, Circle, Square, ZoomIn, ZoomOut, MapPin, Flag, Sun, Moon, Calculator, Play, Pause, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { aStar, findPosition, Position } from "@/lib/astar";
 import { gerarRotaOtimizada, calcularEstatisticasRota, Ponto } from "@/lib/coveragePlanning";
@@ -49,6 +49,11 @@ const RouteOptimization = () => {
     celulasCobertas: number;
     percentualCobertura: number;
   } | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationSpeed, setAnimationSpeed] = useState([300]);
+  const [currentPathIndex, setCurrentPathIndex] = useState(0);
+  const [machinePosition, setMachinePosition] = useState<Position | null>(null);
+  const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const initializeGrid = () => {
     const newGrid: Cell[][] = [];
@@ -89,11 +94,95 @@ const RouteOptimization = () => {
   };
 
   const handleClearGrid = () => {
+    stopAnimation();
     initializeGrid();
     setCalculatedPath([]);
     setCoverageStats(null);
+    setMachinePosition(null);
+    setCurrentPathIndex(0);
     toast.success("Grid limpo!");
   };
+
+  const stopAnimation = () => {
+    if (animationIntervalRef.current) {
+      clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = null;
+    }
+    setIsAnimating(false);
+  };
+
+  const resetAnimation = () => {
+    stopAnimation();
+    setCurrentPathIndex(0);
+    setMachinePosition(calculatedPath.length > 0 ? calculatedPath[0] : null);
+    
+    // Limpa a visualização do caminho, mas mantém os marcadores
+    const newGrid: Cell[][] = grid.map(row => row.map(cell => {
+      if (cell.type === "path") {
+        return { type: "empty" as CellType };
+      }
+      return { ...cell };
+    }));
+    setGrid(newGrid);
+  };
+
+  const startAnimation = () => {
+    if (calculatedPath.length === 0) {
+      toast.error("Calcule uma rota primeiro!");
+      return;
+    }
+
+    // Se já terminou, reseta
+    if (currentPathIndex >= calculatedPath.length) {
+      resetAnimation();
+    }
+
+    setIsAnimating(true);
+  };
+
+  const pauseAnimation = () => {
+    stopAnimation();
+  };
+
+  // Effect para controlar a animação
+  useEffect(() => {
+    if (!isAnimating || calculatedPath.length === 0) return;
+
+    animationIntervalRef.current = setInterval(() => {
+      setCurrentPathIndex((prevIndex) => {
+        const nextIndex = prevIndex + 1;
+
+        if (nextIndex >= calculatedPath.length) {
+          stopAnimation();
+          toast.success("Animação completa!");
+          return prevIndex;
+        }
+
+        const currentPos = calculatedPath[nextIndex];
+        setMachinePosition(currentPos);
+
+        // Atualiza o grid para mostrar o caminho percorrido
+        setGrid((prevGrid) => {
+          const newGrid: Cell[][] = prevGrid.map(row => row.map(cell => ({ ...cell })));
+          
+          // Marca o caminho percorrido
+          if (newGrid[currentPos.row][currentPos.col].type === "empty") {
+            newGrid[currentPos.row][currentPos.col].type = "path";
+          }
+
+          return newGrid;
+        });
+
+        return nextIndex;
+      });
+    }, animationSpeed[0]);
+
+    return () => {
+      if (animationIntervalRef.current) {
+        clearInterval(animationIntervalRef.current);
+      }
+    };
+  }, [isAnimating, animationSpeed, calculatedPath]);
 
   const handleStartRoute = () => {
     if (grid.length === 0) {
@@ -141,20 +230,31 @@ const RouteOptimization = () => {
     toast.success(`Rota calculada! ${pathLength} células no caminho.`);
   };
 
-  const getCellColor = (type: CellType) => {
+  const getCellColor = (type: CellType, rowIdx: number, colIdx: number) => {
     const baseOpacity = "bg-opacity-60";
+    
+    // Destaca a posição atual da máquina durante a animação
+    if (machinePosition && machinePosition.row === rowIdx && machinePosition.col === colIdx) {
+      return "bg-green-500 animate-pulse";
+    }
+    
     switch (type) {
       case "empty": return `${isDarkTheme ? "bg-gray-700" : "bg-gray-300"} ${baseOpacity}`;
       case "obstacle": return `bg-red-600 ${baseOpacity}`;
       case "start": return `bg-yellow-500 ${baseOpacity}`;
       case "end": return `bg-purple-600 ${baseOpacity}`;
       case "machine": return `bg-green-500 ${baseOpacity}`;
-      case "path": return `bg-blue-500 ${baseOpacity}`;
+      case "path": return `bg-blue-500 ${baseOpacity} animate-fade-in`;
       default: return `${isDarkTheme ? "bg-gray-700" : "bg-gray-300"} ${baseOpacity}`;
     }
   };
 
-  const getCellIcon = (type: CellType) => {
+  const getCellIcon = (type: CellType, rowIdx: number, colIdx: number) => {
+    // Mostra o trator na posição atual durante a animação
+    if (machinePosition && machinePosition.row === rowIdx && machinePosition.col === colIdx) {
+      return <Tractor className="w-4 h-4 text-white animate-scale-in" />;
+    }
+    
     switch (type) {
       case "empty": return <Circle className="w-3 h-3" />;
       case "obstacle": return <Square className="w-3 h-3" />;
@@ -439,11 +539,12 @@ const RouteOptimization = () => {
                         row.map((cell, colIdx) => (
                           <div
                             key={`${rowIdx}-${colIdx}`}
-                            className={`w-6 h-6 border ${isDarkTheme ? "border-gray-800" : "border-gray-300"} rounded-sm cursor-pointer flex items-center justify-center ${getCellColor(cell.type)} hover:opacity-80 transition-opacity`}
+                            className={`w-6 h-6 border ${isDarkTheme ? "border-gray-800" : "border-gray-300"} rounded-sm cursor-pointer flex items-center justify-center ${getCellColor(cell.type, rowIdx, colIdx)} hover:opacity-80 transition-all duration-200`}
                             onClick={() => handleCellClick(rowIdx, colIdx)}
                             onMouseEnter={() => handleCellMouseEnter(rowIdx, colIdx)}
                           >
-                            {cell.type !== "empty" && getCellIcon(cell.type)}
+                            {(cell.type !== "empty" || (machinePosition && machinePosition.row === rowIdx && machinePosition.col === colIdx)) && 
+                              getCellIcon(cell.type, rowIdx, colIdx)}
                           </div>
                         ))
                       )}
@@ -699,11 +800,77 @@ const RouteOptimization = () => {
                 </>
               )}
 
+              {/* Animation Controls */}
+              {calculatedPath.length > 0 && (
+                <div className={`p-4 rounded-lg space-y-3 ${isDarkTheme ? "bg-gray-800 border border-gray-700" : "bg-gray-100 border border-gray-300"}`}>
+                  <Label className={`text-sm font-semibold ${isDarkTheme ? "text-white" : "text-gray-900"}`}>
+                    Controles de Animação
+                  </Label>
+                  
+                  <div className="flex items-center justify-between gap-2">
+                    <Button
+                      onClick={isAnimating ? pauseAnimation : startAnimation}
+                      className={`flex-1 ${isAnimating ? "bg-orange-600 hover:bg-orange-700" : "bg-green-600 hover:bg-green-700"} text-white`}
+                      disabled={calculatedPath.length === 0}
+                    >
+                      {isAnimating ? (
+                        <>
+                          <Pause className="w-4 h-4 mr-2" />
+                          Pausar
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Animar
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      onClick={resetAnimation}
+                      variant="outline"
+                      className={`${isDarkTheme ? "bg-gray-700 border-gray-600 text-white hover:bg-gray-600" : "bg-white border-gray-300 hover:bg-gray-50"}`}
+                      disabled={calculatedPath.length === 0}
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Label className={`text-xs ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
+                        Velocidade
+                      </Label>
+                      <span className={`text-xs font-semibold ${isDarkTheme ? "text-gray-300" : "text-gray-700"}`}>
+                        {animationSpeed[0]}ms
+                      </span>
+                    </div>
+                    <Slider
+                      value={animationSpeed}
+                      onValueChange={setAnimationSpeed}
+                      min={50}
+                      max={1000}
+                      step={50}
+                      className="w-full"
+                      disabled={isAnimating}
+                    />
+                    <p className={`text-xs ${isDarkTheme ? "text-gray-500" : "text-gray-500"}`}>
+                      {animationSpeed[0] < 200 ? "Muito rápida" : animationSpeed[0] < 400 ? "Rápida" : animationSpeed[0] < 700 ? "Média" : "Lenta"}
+                    </p>
+                  </div>
+
+                  <div className={`text-xs ${isDarkTheme ? "text-gray-400" : "text-gray-600"}`}>
+                    Progresso: {currentPathIndex} / {calculatedPath.length} células
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="pt-3 space-y-3">
                 <Button
                   onClick={handleFullCoverage}
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  disabled={isAnimating}
                 >
                   <Tractor className="w-4 h-4 mr-2" />
                   Cobertura Total
@@ -711,6 +878,7 @@ const RouteOptimization = () => {
                 <Button
                   onClick={handleStartRoute}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={isAnimating}
                 >
                   Iniciar Rota A-B
                 </Button>
