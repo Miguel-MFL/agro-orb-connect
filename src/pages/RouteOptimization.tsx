@@ -301,10 +301,20 @@ const RouteOptimization = () => {
 
     const pontoInicial: Ponto = { row: startPos.row, col: startPos.col };
 
-    toast.info("Calculando rota de cobertura total a partir do ponto inicial...");
+    // Verifica se há um ponto final marcado
+    const endPos = findPosition(grid, "end");
+    const pontoFinal: Ponto | undefined = endPos 
+      ? { row: endPos.row, col: endPos.col }
+      : undefined;
 
-    // Gera a rota otimizada começando do ponto inicial
-    const rota = gerarRotaOtimizada(mapa, pontoInicial);
+    if (pontoFinal) {
+      toast.info("Calculando rota do ponto inicial até o ponto final...");
+    } else {
+      toast.info("Calculando rota de cobertura total a partir do ponto inicial...");
+    }
+
+    // Gera a rota otimizada começando do ponto inicial e indo até o ponto final (se existir)
+    const rota = gerarRotaOtimizada(mapa, pontoInicial, pontoFinal);
 
     if (!rota || rota.length === 0) {
       toast.error("Não foi possível gerar uma rota de cobertura!");
