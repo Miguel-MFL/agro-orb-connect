@@ -891,13 +891,6 @@ const RouteOptimization = () => {
                   Cobertura Total
                 </Button>
                 <Button
-                  onClick={handleStartRoute}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  disabled={isAnimating}
-                >
-                  Iniciar Rota A-B
-                </Button>
-                <Button
                   onClick={handleClearGrid}
                   variant="destructive"
                   className="w-full bg-red-600 hover:bg-red-700"
