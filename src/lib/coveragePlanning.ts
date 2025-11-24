@@ -36,32 +36,51 @@ function isLivre(mapa: number[][], pos: Ponto): boolean {
 
 /**
  * Gera uma passada vertical (coluna) no padrão Boustrophedon
+ * Divide a passada em segmentos quando encontra obstáculos
  */
 function gerarPassadaVertical(
   mapa: number[][], 
   coluna: number, 
   direcao: 'baixo' | 'cima'
-): Ponto[] {
-  const passada: Ponto[] = [];
+): Ponto[][] {
+  const segmentos: Ponto[][] = [];
+  let segmentoAtual: Ponto[] = [];
   const rows = mapa.length;
   
   if (direcao === 'baixo') {
     // De cima para baixo
     for (let row = 0; row < rows; row++) {
       if (mapa[row][coluna] === 0) {
-        passada.push({ row, col: coluna });
+        segmentoAtual.push({ row, col: coluna });
+      } else {
+        // Encontrou obstáculo, salva o segmento atual se não estiver vazio
+        if (segmentoAtual.length > 0) {
+          segmentos.push([...segmentoAtual]);
+          segmentoAtual = [];
+        }
       }
     }
   } else {
     // De baixo para cima
     for (let row = rows - 1; row >= 0; row--) {
       if (mapa[row][coluna] === 0) {
-        passada.push({ row, col: coluna });
+        segmentoAtual.push({ row, col: coluna });
+      } else {
+        // Encontrou obstáculo, salva o segmento atual se não estiver vazio
+        if (segmentoAtual.length > 0) {
+          segmentos.push([...segmentoAtual]);
+          segmentoAtual = [];
+        }
       }
     }
   }
   
-  return passada;
+  // Adiciona o último segmento se não estiver vazio
+  if (segmentoAtual.length > 0) {
+    segmentos.push(segmentoAtual);
+  }
+  
+  return segmentos;
 }
 
 /**
@@ -144,17 +163,15 @@ export function gerarRotaOtimizada(
   const rotaCompleta: Ponto[] = [inicio];
   let posicaoAtual = inicio;
   
-  // Gera todas as passadas verticais (Boustrophedon)
-  const passadas: Ponto[][] = [];
+  // Gera todos os segmentos de passadas verticais (Boustrophedon com divisão por obstáculos)
+  const todosSegmentos: Ponto[][] = [];
   for (let col = 0; col < cols; col++) {
     const direcao = col % 2 === 0 ? 'baixo' : 'cima';
-    const passada = gerarPassadaVertical(mapa, col, direcao);
-    if (passada.length > 0) {
-      passadas.push(passada);
-    }
+    const segmentos = gerarPassadaVertical(mapa, col, direcao);
+    todosSegmentos.push(...segmentos);
   }
   
-  if (passadas.length === 0) {
+  if (todosSegmentos.length === 0) {
     return [inicio]; // Campo sem células vazias
   }
   
@@ -162,38 +179,66 @@ export function gerarRotaOtimizada(
   const visitado = Array(rows).fill(null).map(() => Array(cols).fill(false));
   visitado[inicio.row][inicio.col] = true;
   
-  // Processa cada passada
-  let passadasProcessadas = 0;
-  const passadasRestantes = [...passadas];
+  // Processa cada segmento
+  const segmentosRestantes = [...todosSegmentos];
+  let iteracoes = 0;
+  const maxIteracoes = todosSegmentos.length * 3;
   
-  while (passadasRestantes.length > 0 && passadasProcessadas < passadas.length * 2) {
-    // Encontra a passada mais próxima
-    const indicePassadaMaisProxima = passadasRestantes.findIndex(passada => {
-      return passada.some(p => !visitado[p.row][p.col]);
-    });
+  while (segmentosRestantes.length > 0 && iteracoes < maxIteracoes) {
+    iteracoes++;
     
-    if (indicePassadaMaisProxima === -1) break;
+    // Encontra o segmento mais próximo que ainda tem células não visitadas
+    let melhorSegmento: Ponto[] | null = null;
+    let melhorIndice = -1;
+    let melhorPontoEntrada: Ponto | null = null;
+    let menorDistancia = Infinity;
     
-    const passadaAtual = passadasRestantes[indicePassadaMaisProxima];
-    
-    // Encontra o ponto de entrada mais próximo nesta passada
-    const pontosNaoVisitados = passadaAtual.filter(p => !visitado[p.row][p.col]);
-    if (pontosNaoVisitados.length === 0) {
-      passadasRestantes.splice(indicePassadaMaisProxima, 1);
-      continue;
+    for (let i = 0; i < segmentosRestantes.length; i++) {
+      const segmento = segmentosRestantes[i];
+      const pontosNaoVisitados = segmento.filter(p => !visitado[p.row][p.col]);
+      
+      if (pontosNaoVisitados.length === 0) continue;
+      
+      // Encontra o ponto de entrada mais próximo neste segmento
+      for (const ponto of pontosNaoVisitados) {
+        const distancia = Math.abs(ponto.row - posicaoAtual.row) + Math.abs(ponto.col - posicaoAtual.col);
+        if (distancia < menorDistancia) {
+          menorDistancia = distancia;
+          melhorSegmento = segmento;
+          melhorIndice = i;
+          melhorPontoEntrada = ponto;
+        }
+      }
     }
     
-    const indicePontoEntrada = encontrarPontoMaisProximo(posicaoAtual, pontosNaoVisitados);
-    const pontoEntrada = pontosNaoVisitados[indicePontoEntrada];
+    if (!melhorSegmento || !melhorPontoEntrada) {
+      // Não há mais segmentos acessíveis
+      break;
+    }
     
     // Conecta posição atual ao ponto de entrada usando A*
-    if (posicaoAtual.row !== pontoEntrada.row || posicaoAtual.col !== pontoEntrada.col) {
-      const caminhoConexao = conectarPontosComAStar(grid, posicaoAtual, pontoEntrada);
+    if (posicaoAtual.row !== melhorPontoEntrada.row || posicaoAtual.col !== melhorPontoEntrada.col) {
+      const caminhoConexao = conectarPontosComAStar(grid, posicaoAtual, melhorPontoEntrada);
       
       if (!caminhoConexao) {
-        // Se não conseguir conectar, tenta próxima passada
-        passadasRestantes.splice(indicePassadaMaisProxima, 1);
-        passadasProcessadas++;
+        // Se não conseguir conectar, remove este segmento e tenta o próximo
+        segmentosRestantes.splice(melhorIndice, 1);
+        continue;
+      }
+      
+      // VALIDAÇÃO CRÍTICA: Verifica se o caminho passa por obstáculos
+      let caminhoSeguro = true;
+      for (const p of caminhoConexao) {
+        if (mapa[p.row][p.col] === 1) {
+          console.warn('Caminho A* tentou passar por obstáculo!');
+          caminhoSeguro = false;
+          break;
+        }
+      }
+      
+      if (!caminhoSeguro) {
+        // Caminho não é seguro, remove este segmento
+        segmentosRestantes.splice(melhorIndice, 1);
         continue;
       }
       
@@ -205,29 +250,45 @@ export function gerarRotaOtimizada(
         }
       });
       
-      posicaoAtual = pontoEntrada;
+      posicaoAtual = melhorPontoEntrada;
     }
     
-    // Percorre a passada a partir do ponto de entrada
-    const indiceInicioPassada = passadaAtual.findIndex(
-      p => p.row === pontoEntrada.row && p.col === pontoEntrada.col
+    // Percorre o segmento a partir do ponto de entrada
+    const indiceInicioSegmento = melhorSegmento.findIndex(
+      p => p.row === melhorPontoEntrada!.row && p.col === melhorPontoEntrada!.col
     );
     
-    for (let i = indiceInicioPassada; i < passadaAtual.length; i++) {
-      const ponto = passadaAtual[i];
+    let celulasAdicionadas = 0;
+    for (let i = indiceInicioSegmento; i < melhorSegmento.length; i++) {
+      const ponto = melhorSegmento[i];
+      
+      // VALIDAÇÃO: Garante que não está em obstáculo
+      if (mapa[ponto.row][ponto.col] === 1) {
+        console.warn('Tentou adicionar obstáculo à rota!');
+        break;
+      }
+      
       if (!visitado[ponto.row][ponto.col]) {
         rotaCompleta.push(ponto);
         visitado[ponto.row][ponto.col] = true;
         posicaoAtual = ponto;
+        celulasAdicionadas++;
       }
     }
     
-    // Remove passada processada
-    passadasRestantes.splice(indicePassadaMaisProxima, 1);
-    passadasProcessadas++;
+    // Remove segmento processado
+    if (celulasAdicionadas > 0) {
+      segmentosRestantes.splice(melhorIndice, 1);
+    } else {
+      // Se não adicionou nenhuma célula, remove e tenta próximo
+      segmentosRestantes.splice(melhorIndice, 1);
+    }
   }
   
-  return rotaCompleta;
+  // VALIDAÇÃO FINAL: Remove qualquer obstáculo que possa ter entrado na rota
+  const rotaSegura = rotaCompleta.filter(p => mapa[p.row][p.col] === 0);
+  
+  return rotaSegura;
 }
 
 /**
