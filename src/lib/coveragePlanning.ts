@@ -303,7 +303,7 @@ export function gerarRotaOtimizada(
   const rotaSegura = rotaCompleta.filter(p => mapa[p.row][p.col] === 0);
   
   // Se há ponto final e ele não foi alcançado, conecta até lá
-  if (fim && posicaoAtual.row !== fim.row || posicaoAtual.col !== fim.col) {
+  if (fim && (posicaoAtual.row !== fim.row || posicaoAtual.col !== fim.col)) {
     const caminhoFinal = conectarPontosComAStar(grid, posicaoAtual, fim);
     
     if (caminhoFinal) {
