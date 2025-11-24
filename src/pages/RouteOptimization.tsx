@@ -9,8 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Tractor, ArrowLeft, Circle, Square, ZoomIn, ZoomOut, MapPin, Flag, Sun, Moon, Calculator } from "lucide-react";
 import { toast } from "sonner";
+import { aStar, findPosition, Position } from "@/lib/astar";
 
-type CellType = "empty" | "obstacle" | "start" | "end" | "machine";
+type CellType = "empty" | "obstacle" | "start" | "end" | "machine" | "path";
 type DrawMode = CellType;
 
 interface Cell {
@@ -41,6 +42,7 @@ const RouteOptimization = () => {
   const [grid, setGrid] = useState<Cell[][]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true);
+  const [calculatedPath, setCalculatedPath] = useState<Position[]>([]);
 
   const initializeGrid = () => {
     const newGrid: Cell[][] = [];
@@ -82,15 +84,54 @@ const RouteOptimization = () => {
 
   const handleClearGrid = () => {
     initializeGrid();
+    setCalculatedPath([]);
     toast.success("Grid limpo!");
   };
 
   const handleStartRoute = () => {
     if (grid.length === 0) {
-      toast.error("Aplique as dimensões primeiro!");
+      toast.error("Inicialize o grid primeiro!");
       return;
     }
-    toast.success("Rota iniciada!");
+
+    // Encontra posições de início e fim no grid
+    const startPos = findPosition(grid, "start");
+    const endPos = findPosition(grid, "end");
+
+    if (!startPos) {
+      toast.error("Marque um ponto de início no grid!");
+      return;
+    }
+
+    if (!endPos) {
+      toast.error("Marque um ponto de fim no grid!");
+      return;
+    }
+
+    // Executa o algoritmo A*
+    const path = aStar(grid, startPos, endPos);
+
+    if (!path) {
+      toast.error("Não foi possível encontrar uma rota! Verifique se há obstáculos bloqueando o caminho.");
+      return;
+    }
+
+    // Atualiza o grid com o caminho calculado
+    const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
+    
+    for (const pos of path) {
+      // Não sobrescreve início e fim
+      if (newGrid[pos.row][pos.col].type !== "start" && 
+          newGrid[pos.row][pos.col].type !== "end") {
+        newGrid[pos.row][pos.col].type = "path";
+      }
+    }
+
+    setGrid(newGrid);
+    setCalculatedPath(path);
+    
+    const pathLength = path.length;
+    toast.success(`Rota calculada! ${pathLength} células no caminho.`);
   };
 
   const getCellColor = (type: CellType) => {
@@ -101,6 +142,7 @@ const RouteOptimization = () => {
       case "start": return `bg-yellow-500 ${baseOpacity}`;
       case "end": return `bg-purple-600 ${baseOpacity}`;
       case "machine": return `bg-green-500 ${baseOpacity}`;
+      case "path": return `bg-blue-500 ${baseOpacity}`;
       default: return `${isDarkTheme ? "bg-gray-700" : "bg-gray-300"} ${baseOpacity}`;
     }
   };
