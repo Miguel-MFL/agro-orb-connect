@@ -11,6 +11,7 @@ import { Tractor, ArrowLeft, Circle, Square, ZoomIn, ZoomOut, MapPin, Flag, Sun,
 import { toast } from "sonner";
 import { aStar, findPosition, Position } from "@/lib/astar";
 import { gerarRotaOtimizada, calcularEstatisticasRota, Ponto } from "@/lib/coveragePlanning";
+import ormaLogo from "@/assets/orma-logo.png";
 
 type CellType = "empty" | "obstacle" | "start" | "end" | "machine" | "path";
 type DrawMode = CellType;
@@ -403,7 +404,7 @@ const RouteOptimization = () => {
       <header className={`${isDarkTheme ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} border-b py-4 px-6`}>
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Tractor className="w-8 h-8 text-blue-500" />
+            <img src={ormaLogo} alt="Orma Logo" className="w-8 h-8" />
             <h1 className="text-2xl font-bold">Simulador de Rotas de Máquinas Agrícolas</h1>
           </div>
           <div className="flex items-center gap-4">
