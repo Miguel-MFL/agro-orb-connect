@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tractor, ArrowLeft, Circle, Square, ZoomIn, ZoomOut, MapPin, Flag, Sun, Moon, Calculator } from "lucide-react";
 import { toast } from "sonner";
 import { aStar, findPosition, Position } from "@/lib/astar";
+import { gerarRotaOtimizada, calcularEstatisticasRota, Ponto } from "@/lib/coveragePlanning";
 
 type CellType = "empty" | "obstacle" | "start" | "end" | "machine" | "path";
 type DrawMode = CellType;
@@ -43,6 +44,11 @@ const RouteOptimization = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [calculatedPath, setCalculatedPath] = useState<Position[]>([]);
+  const [coverageStats, setCoverageStats] = useState<{
+    distanciaTotal: number;
+    celulasCobertas: number;
+    percentualCobertura: number;
+  } | null>(null);
 
   const initializeGrid = () => {
     const newGrid: Cell[][] = [];
@@ -85,6 +91,7 @@ const RouteOptimization = () => {
   const handleClearGrid = () => {
     initializeGrid();
     setCalculatedPath([]);
+    setCoverageStats(null);
     toast.success("Grid limpo!");
   };
 
@@ -156,6 +163,82 @@ const RouteOptimization = () => {
       case "machine": return <Tractor className="w-3 h-3" />;
       default: return <Circle className="w-3 h-3" />;
     }
+  };
+
+  const handleFullCoverage = () => {
+    if (grid.length === 0) {
+      toast.error("Inicialize o grid primeiro!");
+      return;
+    }
+
+    // Converte o grid para matriz numérica (0=vazio, 1=obstáculo)
+    const mapa: number[][] = grid.map(row =>
+      row.map(cell => (cell.type === "obstacle" ? 1 : 0))
+    );
+
+    // Encontra o ponto de início (marcado como "start" ou primeira célula vazia)
+    let pontoInicial: Ponto | null = null;
+    const startPos = findPosition(grid, "start");
+    
+    if (startPos) {
+      pontoInicial = { row: startPos.row, col: startPos.col };
+    } else {
+      // Se não há ponto marcado como início, usa a primeira célula vazia
+      for (let row = 0; row < grid.length; row++) {
+        for (let col = 0; col < grid[row].length; col++) {
+          if (grid[row][col].type === "empty") {
+            pontoInicial = { row, col };
+            break;
+          }
+        }
+        if (pontoInicial) break;
+      }
+    }
+
+    if (!pontoInicial) {
+      toast.error("Não há células vazias no grid!");
+      return;
+    }
+
+    toast.info("Calculando rota de cobertura total...");
+
+    // Gera a rota otimizada
+    const rota = gerarRotaOtimizada(mapa, pontoInicial);
+
+    if (!rota || rota.length === 0) {
+      toast.error("Não foi possível gerar uma rota de cobertura!");
+      return;
+    }
+
+    // Atualiza o grid com a rota calculada
+    const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
+    
+    for (const pos of rota) {
+      // Não sobrescreve início, fim ou máquina
+      if (newGrid[pos.row][pos.col].type !== "start" && 
+          newGrid[pos.row][pos.col].type !== "end" &&
+          newGrid[pos.row][pos.col].type !== "machine") {
+        newGrid[pos.row][pos.col].type = "path";
+      }
+    }
+
+    setGrid(newGrid);
+    setCalculatedPath(rota);
+
+    // Calcula estatísticas
+    const stats = calcularEstatisticasRota(rota);
+    
+    // Calcula o percentual de cobertura
+    const totalCelulasVazias = grid.flat().filter(cell => 
+      cell.type === "empty" || cell.type === "start" || cell.type === "end" || cell.type === "machine"
+    ).length;
+    stats.percentualCobertura = totalCelulasVazias > 0 
+      ? (stats.celulasCobertas / totalCelulasVazias) * 100 
+      : 0;
+
+    setCoverageStats(stats);
+
+    toast.success(`Rota de cobertura calculada! ${rota.length} células, ${stats.percentualCobertura.toFixed(1)}% de cobertura.`);
   };
 
   const handleCalculateEstimates = () => {
@@ -584,13 +667,52 @@ const RouteOptimization = () => {
                 </p>
               </div>
 
+              {/* Coverage Stats */}
+              {coverageStats && (
+                <>
+                  <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-green-900/30 border border-green-700" : "bg-green-100 border border-green-300"}`}>
+                    <Label className={`text-sm ${isDarkTheme ? "text-green-400" : "text-green-700"}`}>
+                      Distância Total da Rota
+                    </Label>
+                    <p className={`text-lg font-semibold ${isDarkTheme ? "text-green-300" : "text-green-900"}`}>
+                      {coverageStats.distanciaTotal} células
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-green-900/30 border border-green-700" : "bg-green-100 border border-green-300"}`}>
+                    <Label className={`text-sm ${isDarkTheme ? "text-green-400" : "text-green-700"}`}>
+                      Células Cobertas
+                    </Label>
+                    <p className={`text-lg font-semibold ${isDarkTheme ? "text-green-300" : "text-green-900"}`}>
+                      {coverageStats.celulasCobertas} células
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-lg ${isDarkTheme ? "bg-green-900/30 border border-green-700" : "bg-green-100 border border-green-300"}`}>
+                    <Label className={`text-sm ${isDarkTheme ? "text-green-400" : "text-green-700"}`}>
+                      Percentual de Cobertura
+                    </Label>
+                    <p className={`text-lg font-semibold ${isDarkTheme ? "text-green-300" : "text-green-900"}`}>
+                      {coverageStats.percentualCobertura.toFixed(1)}%
+                    </p>
+                  </div>
+                </>
+              )}
+
               {/* Action Buttons */}
               <div className="pt-3 space-y-3">
+                <Button
+                  onClick={handleFullCoverage}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Tractor className="w-4 h-4 mr-2" />
+                  Cobertura Total
+                </Button>
                 <Button
                   onClick={handleStartRoute}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Iniciar Rota
+                  Iniciar Rota A-B
                 </Button>
                 <Button
                   onClick={handleClearGrid}
