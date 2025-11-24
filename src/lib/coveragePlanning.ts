@@ -139,7 +139,7 @@ function encontrarPontoMaisProximo(origem: Ponto, pontos: Ponto[]): number {
  * 
  * @param mapa - Matriz 2D onde 0=vazio, 1=obstáculo
  * @param inicio - Posição inicial da máquina
- * @param fim - Posição final opcional (se fornecida, para quando atingir)
+ * @param fim - Posição final opcional (se fornecida, faz cobertura total e termina lá)
  * @returns Lista ordenada de coordenadas ou null se impossível
  */
 export function gerarRotaOtimizada(
@@ -190,10 +190,13 @@ export function gerarRotaOtimizada(
     iteracoes++;
     
     // Encontra o segmento mais próximo que ainda tem células não visitadas
+    // Se há ponto final e este é o último segmento, prioriza segmentos próximos ao fim
     let melhorSegmento: Ponto[] | null = null;
     let melhorIndice = -1;
     let melhorPontoEntrada: Ponto | null = null;
     let menorDistancia = Infinity;
+    
+    const ehUltimaPassada = segmentosRestantes.length === 1;
     
     for (let i = 0; i < segmentosRestantes.length; i++) {
       const segmento = segmentosRestantes[i];
@@ -203,7 +206,15 @@ export function gerarRotaOtimizada(
       
       // Encontra o ponto de entrada mais próximo neste segmento
       for (const ponto of pontosNaoVisitados) {
-        const distancia = Math.abs(ponto.row - posicaoAtual.row) + Math.abs(ponto.col - posicaoAtual.col);
+        let distancia: number;
+        
+        // Se é a última passada e há ponto final, prioriza proximidade ao fim
+        if (ehUltimaPassada && fim) {
+          distancia = Math.abs(ponto.row - fim.row) + Math.abs(ponto.col - fim.col);
+        } else {
+          distancia = Math.abs(ponto.row - posicaoAtual.row) + Math.abs(ponto.col - posicaoAtual.col);
+        }
+        
         if (distancia < menorDistancia) {
           menorDistancia = distancia;
           melhorSegmento = segmento;
@@ -249,19 +260,8 @@ export function gerarRotaOtimizada(
         rotaCompleta.push(p);
         if (isLivre(mapa, p)) {
           visitado[p.row][p.col] = true;
-          
-          // PARA quando alcança o ponto final (se fornecido)
-          if (fim && p.row === fim.row && p.col === fim.col) {
-            console.log('Ponto final alcançado durante conexão A*!');
-            return;
-          }
         }
       });
-      
-      // Se alcançou o ponto final durante a conexão, retorna
-      if (fim && rotaCompleta.some(p => p.row === fim.row && p.col === fim.col)) {
-        return rotaCompleta.filter(p => mapa[p.row][p.col] === 0);
-      }
       
       posicaoAtual = melhorPontoEntrada;
     }
@@ -287,12 +287,6 @@ export function gerarRotaOtimizada(
         visitado[ponto.row][ponto.col] = true;
         posicaoAtual = ponto;
         celulasAdicionadas++;
-        
-        // PARA quando alcança o ponto final (se fornecido)
-        if (fim && ponto.row === fim.row && ponto.col === fim.col) {
-          console.log('Ponto final alcançado!');
-          return rotaCompleta.filter(p => mapa[p.row][p.col] === 0);
-        }
       }
     }
     
@@ -307,6 +301,26 @@ export function gerarRotaOtimizada(
   
   // VALIDAÇÃO FINAL: Remove qualquer obstáculo que possa ter entrado na rota
   const rotaSegura = rotaCompleta.filter(p => mapa[p.row][p.col] === 0);
+  
+  // Se há ponto final e ele não foi alcançado, conecta até lá
+  if (fim && posicaoAtual.row !== fim.row || posicaoAtual.col !== fim.col) {
+    const caminhoFinal = conectarPontosComAStar(grid, posicaoAtual, fim);
+    
+    if (caminhoFinal) {
+      // Adiciona apenas células não visitadas no caminho final
+      caminhoFinal.forEach(p => {
+        if (!visitado[p.row][p.col] && mapa[p.row][p.col] === 0) {
+          rotaSegura.push(p);
+          visitado[p.row][p.col] = true;
+        }
+      });
+      
+      // Garante que o ponto final está na rota
+      if (!visitado[fim.row][fim.col] && mapa[fim.row][fim.col] === 0) {
+        rotaSegura.push(fim);
+      }
+    }
+  }
   
   return rotaSegura;
 }
