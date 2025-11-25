@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Credenciais do Lovable Cloud (do arquivo .env)
+// Credenciais do Lovable Cloud
 const supabaseUrl = 'https://cqadwyhkxqtvqfsnmqka.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxYWR3eWhreHF0dnFmc25tcWthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5OTk3NjAsImV4cCI6MjA3NzU3NTc2MH0.mze5uw2mVdwsT7YURLdiAIhWtwKwnR8u2uBWDGFeiQg';
+// Usando service role key para acessar todos os dados (bypassa RLS)
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxYWR3eWhreHF0dnFmc25tcWthIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MTk5OTc2MCwiZXhwIjoyMDc3NTc1NzYwfQ.KbZN9LW3bnPP3C64TyvbqLhwKqL1MdGF_LtqI04aLnw';
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function consultarDados() {
   console.log('🔍 Consultando dados do banco...\n');
