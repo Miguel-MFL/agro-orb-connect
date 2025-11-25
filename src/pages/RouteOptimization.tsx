@@ -583,8 +583,6 @@ const RouteOptimization = () => {
                   { value: "empty", label: "Vazio", icon: Circle },
                   { value: "obstacle", label: "Obstáculo", icon: Square },
                   { value: "start", label: "Início", icon: MapPin },
-                  { value: "end", label: "Fim", icon: Flag },
-                  { value: "machine", label: "Máquina", icon: Tractor },
                 ].map((mode) => {
                   const Icon = mode.icon;
                   return (
