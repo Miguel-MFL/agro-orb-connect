@@ -4,11 +4,10 @@ services:
     image: node:20-alpine
     working_dir: /app
     ports:
-      - "3000:3000"        # Porta padrão do Create React App
-      - "35729:35729"      # Porta usada pelo Webpack para live reload (opcional, mas recomendado)
+      - "3000:5173"     #porta usada pelo Vite
     volumes:
       - .:/app             # Monta todo o projeto dentro do container
       - /app/node_modules  # Evita que o node_modules do host sobrescreva o do container
     environment:
       - CHOKIDAR_USEPOLLING=true  # Necessário para watch funcionar em containers (Linux/WSL)
-    command: sh -c "npm install && npm start"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
