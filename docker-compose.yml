@@ -1,8 +1,14 @@
-version: '3.8'
 
 services:
-  web:
-    image: nginx:alpine
+  react-app:
+    image: node:20-alpine
+    working_dir: /app
     ports:
-      - "80:80"
-    restart: unless-stopped
+      - "3000:3000"        # Porta padrão do Create React App
+      - "35729:35729"      # Porta usada pelo Webpack para live reload (opcional, mas recomendado)
+    volumes:
+      - .:/app             # Monta todo o projeto dentro do container
+      - /app/node_modules  # Evita que o node_modules do host sobrescreva o do container
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Necessário para watch funcionar em containers (Linux/WSL)
+    command: sh -c "npm install && npm start"
