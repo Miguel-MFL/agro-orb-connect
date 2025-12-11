@@ -20,9 +20,9 @@ jobs:
             - name: Login Docker Hub
               run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
             - name: Build docker image 
-              run: docker build -t yaibadu/orna-projeto .
+              run: docker build -t yaibadu/agro-orb-connect .
             - name: Push image docker
-              run: docker push yaibadu/orna-projeto
+              run: docker push yaibadu/agro-orb-connect
 
 
            
