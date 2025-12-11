@@ -24,5 +24,15 @@ jobs:
             - name: Push image docker
               run: docker push yaibadu/agro-orb-connect
 
+    deploy:
+        needs: build
+        runs-on: self-hosted
+        steps:
+            - name: Pull ima from docker hub
+              run: docker pull yaibadu/agro-orb-connect:latest
+            - name: Run docker conteiner
+              run: docker run -d -p 3000:3000 --name orna-projeto yaibadu/agro-orb-connect
+
+
 
            
