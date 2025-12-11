@@ -14,9 +14,9 @@ jobs:
             - name: Setup node
               uses: actions/setup-node@v6
               with:
-                 node-version: 24
-            - name: Build project
-              run: npm ci
+                 node-version: 20
+            #- name: Build project
+            #  run: npm ci
             - name: Login Docker Hub
               run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
             - name: Build docker image 
