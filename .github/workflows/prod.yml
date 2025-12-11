@@ -1,0 +1,44 @@
+name: Orna Projeto
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup node
+              uses: actions/setup-node@v6
+              with:
+                 node-version: 20
+            #- name: Build project
+            #  run: npm ci
+            - name: Login Docker Hub
+              run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+            - name: Build docker image 
+              run: docker build -t yaibadu/agro-orb-connect .
+            - name: Push image docker
+              run: docker push yaibadu/agro-orb-connect
+
+    deploy:
+        needs: build
+        runs-on: self-hosted
+        steps:
+            - name: Pull ima from docker hub
+              run: docker pull yaibadu/agro-orb-connect:latest
+            - name: Run docker conteiner
+              run: docker run -d -p 3000:3000 --name avant-gard yaibadu/agro-orb-connect
+            - name: Stop and remove existing container (if any)
+              run: |
+                  docker stop avant-gard || true
+                  docker rm avant-gard || true
+            - name: Run new container
+              run: docker run -d -p 3000:3000 --name avant-gard yaibadu/agro-orb-connect
+
+
+
+           
