@@ -29,15 +29,6 @@ COPY . .
 # Faz o build da aplicação
 RUN npm run build
 
-# ---- Fase final (mínima) ----
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Instala apenas as dependências de produção
-COPY package.json package-lock.json* ./
-RUN npm ci --only=production
-
 # Copia os arquivos estáticos gerados
 COPY --from=builder /app/dist ./dist
 
