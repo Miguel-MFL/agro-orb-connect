@@ -20,7 +20,7 @@ jobs:
             - name: Login Docker Hub
               run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
             - name: Build docker image 
-              run: docker build -f Dockerfile.dev -t yaibadu/agro-orb-connect .
+              run: docker build -t yaibadu/agro-orb-connect .
             - name: Push image docker
               run: docker push yaibadu/agro-orb-connect
 
