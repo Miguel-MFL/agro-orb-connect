@@ -21,6 +21,7 @@ COPY package.json package-lock.json* ./
 
 # Instala dependências (incluindo devDependencies, necessárias para build)
 RUN npm ci
+RUN npm install 
 
 # Copia código-fonte
 COPY . .
