@@ -44,4 +44,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 
 # Roda o servidor de preview do Vite (leve, para servir arquivos estáticos)
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
