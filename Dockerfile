@@ -12,15 +12,19 @@
 #CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
 
 # Build
-FROM node:18 AS build
+FROM node:20-alpine
+
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install
+
+# Instala o serve globalmente
+RUN npm install -g serve
+
 COPY . .
+
 RUN npm run build
 
-# Production
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Inicia o servidor serve
+CMD ["serve", "-s", "dist", "-l", "3000"]
