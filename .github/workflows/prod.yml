@@ -32,12 +32,10 @@ jobs:
               run: docker pull yaibadu/agro-orb-connect:latest
             - name: Run docker conteiner
               run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
-            - name: Stop and remove existing container (if any)
-              run: |
-                  docker stop novo-orna || true
-                  docker rm novo-orna || true
+            - name: Remove docker container
+              run: docker rm -rf novo-orna 
             - name: Run new container
-              run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
+              run: docker run -d -p 3000:3000 --name novo-orna  yaibadu/agro-orb-connect
 
 
 
