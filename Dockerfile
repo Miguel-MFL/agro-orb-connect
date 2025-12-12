@@ -11,7 +11,7 @@
 
 #CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
 
-# Dockerfile (para produção)
+# Dockerfile para produção
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -29,11 +29,19 @@ COPY . .
 # Faz o build da aplicação
 RUN npm run build
 
-# Copia os arquivos estáticos gerados
+# ---- Fase final (leve e segura) ----
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instala APENAS dependências de produção (inclui "serve")
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production
+
+# Copia os arquivos estáticos do build
 COPY --from=builder /app/dist ./dist
 
-# Expõe a porta
 EXPOSE 3000
 
-# Roda o servidor de preview do Vite (leve, para servir arquivos estáticos)
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+# Usa o servidor de produção
+CMD ["npm", "start"]
