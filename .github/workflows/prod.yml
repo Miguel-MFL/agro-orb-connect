@@ -31,13 +31,13 @@ jobs:
             - name: Pull ima from docker hub
               run: docker pull yaibadu/agro-orb-connect:latest
             - name: Run docker conteiner
-              run: docker run -d -p 3000:3000 --name avant-gard yaibadu/agro-orb-connect
+              run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
             - name: Stop and remove existing container (if any)
               run: |
-                  docker stop avant-gard || true
-                  docker rm avant-gard || true
+                  docker stop novo-orna || true
+                  docker rm novo-orna || true
             - name: Run new container
-              run: docker run -d -p 3000:3000 --name avant-gard yaibadu/agro-orb-connect
+              run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
 
 
 
