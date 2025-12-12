@@ -33,7 +33,7 @@ jobs:
             - name: Run docker conteiner
               run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
             - name: Remove docker container
-              run: docker rm -rf novo-orna 
+              run: docker rm -f novo-orna 
             - name: Run new container
               run: docker run -d -p 3000:3000 --name novo-orna  yaibadu/agro-orb-connect
 
