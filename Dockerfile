@@ -15,17 +15,9 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-
-# Copia arquivos de dependência
 COPY package.json package-lock.json* ./
-
-# Instala dependências (incluindo devDependencies, necessárias para build)
 RUN npm ci
-
-# Copia código-fonte
 COPY . .
-
-# Faz o build da aplicação
 RUN npm run build
 
 # ---- Fase final (mínima) ----
@@ -33,7 +25,6 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Instala apenas as dependências de produção
 COPY package.json package-lock.json* ./
 RUN npm ci --only=production
 
@@ -44,4 +35,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 
 # Roda o servidor de preview do Vite (leve, para servir arquivos estáticos)
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["npm", "run", "preview"]
