@@ -34,8 +34,8 @@ jobs:
               run: docker rm -f yaibadu/agro-orb-connect
             - name: Run docker conteiner
               run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
-            - name: Run new container
-              run: docker run -d -p 3000:3000 --name novo-orna  yaibadu/agro-orb-connect
+           # - name: Run new container
+            #  run: docker run -d -p 3000:3000 --name novo-orna  yaibadu/agro-orb-connect
 
 
 
