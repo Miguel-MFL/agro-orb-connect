@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "commonjs",
   "scripts": {
-    "start": "serve -s dist -l 3000" ,
+    "start": "npx serve -s dist --listen tcp://0.0.0.0:3000" ,
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
