@@ -30,8 +30,8 @@ jobs:
         steps:
             - name: Pull ima from docker hub
               run: docker pull yaibadu/agro-orb-connect:latest
-            - name: Run docker conteiner
-              run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
+           # - name: Run docker conteiner
+            #  run: docker run -d -p 3000:3000 --name novo-orna yaibadu/agro-orb-connect
             - name: Remove docker container
               run: docker rmi -f yaibadu/agro-orb-connect
             - name: Run new container
